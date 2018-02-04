@@ -1,0 +1,21 @@
+# empty newlines and lines beginning with a "#" character are ignored.
+# CHEF SETTINGS
+ChefBaseURL https://chef.server.com
+ChefUser me
+ChefKey /my/personal/.chef/pem_file
+
+
+# Orchestrator settings
+OrcBaseAPI orchasterBase/api
+OrcUsername orchestrator_user
+OrcPasswd dba_password
+
+#Github token for integration
+GithubToken some_secret_token
+
+WebAddress :8080
+
+
+# DB connections settings
+DBUser db_schema_user
+DBPasswd very_secure_password
