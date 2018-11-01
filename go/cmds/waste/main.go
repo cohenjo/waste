@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/cohenjo/waste/go/helpers"
-	"github.com/shurcooL/githubql"
+	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
@@ -28,24 +28,24 @@ type ChangedFile struct {
 type ChangedFiles []ChangedFile
 
 type PullRequestDetails struct {
-	Id      githubql.ID
-	Title   githubql.String
-	Number  githubql.Int
+	Id      githubv4.ID
+	Title   githubv4.String
+	Number  githubv4.Int
 	Reviews struct {
-		TotalCount githubql.Int
+		TotalCount githubv4.Int
 	} `graphql:"reviews(states:APPROVED)"`
 }
 
 // ApprovedPullRequestsQuery represents all open, approved pull requests
 type ApprovedPullRequestsQuery struct {
 	Repository struct {
-		DatabaseID   githubql.Int
-		URL          githubql.URI
+		DatabaseID   githubv4.Int
+		URL          githubv4.URI
 		PullRequests struct {
 			Nodes    []PullRequestDetails
 			PageInfo struct {
-				EndCursor   githubql.String
-				HasNextPage githubql.Boolean
+				EndCursor   githubv4.String
+				HasNextPage githubv4.Boolean
 			}
 		} `graphql:"pullRequests(first:$pullsFirst,states:OPEN)"`
 	} `graphql:"repository(owner: $owner, name: $name)"`
@@ -54,7 +54,7 @@ type ApprovedPullRequestsQuery struct {
 // PullRequestsCommentMutation represents a change to pull request comments
 type PullRequestsCommentMutation struct {
 	AddComment struct {
-		ClientMutationID githubql.String
+		ClientMutationID githubv4.String
 	} `graphql:"addComment(input: $input)"`
 }
 
@@ -169,9 +169,9 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPull
 	var q ApprovedPullRequestsQuery
 
 	variables := map[string]interface{}{
-		"owner":      githubql.String(owner),
-		"name":       githubql.String(name),
-		"pullsFirst": githubql.NewInt(3),
+		"owner":      githubv4.String(owner),
+		"name":       githubv4.String(name),
+		"pullsFirst": githubv4.NewInt(3),
 	}
 
 	src := oauth2.StaticTokenSource(
@@ -179,7 +179,7 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPull
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 
-	client := githubql.NewClient(httpClient)
+	client := githubv4.NewClient(httpClient)
 
 	err := client.Query(ctx, &q, variables)
 	if err != nil {
@@ -192,19 +192,19 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPull
 }
 
 // fetchRepoDescription fetches description of repo with owner and name.
-func commentPullRequest(ctx context.Context, message, name string, id githubql.ID) (string, error) {
+func commentPullRequest(ctx context.Context, message, name string, id githubv4.ID) (string, error) {
 	var q PullRequestsCommentMutation
 
-	var aci githubql.AddCommentInput
-	aci.Body = githubql.String(message)
-	aci.SubjectID = githubql.ID(id)
+	var aci githubv4.AddCommentInput
+	aci.Body = githubv4.String(message)
+	aci.SubjectID = githubv4.ID(id)
 
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 
-	client := githubql.NewClient(httpClient)
+	client := githubv4.NewClient(httpClient)
 
 	err := client.Mutate(ctx, &q, aci, nil)
 	if err != nil {

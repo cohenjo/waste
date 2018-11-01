@@ -2,6 +2,7 @@
 # configuration file with password
 conf/*.conf
 
+vendor/
 
 # dotenv
 .env
