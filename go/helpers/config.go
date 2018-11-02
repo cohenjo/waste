@@ -24,6 +24,8 @@ type CLIOptions struct {
 	OrcUsername       string
 	OrcPasswd         string
 	GithubToken       string
+	GithubOwner       string
+	GithubRepo        string
 	WebAddress        string
 }
 

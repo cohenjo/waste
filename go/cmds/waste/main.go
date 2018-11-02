@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/cohenjo/waste/go/helpers"
-	wasteHttp "github.com/cohenjo/waste/go/http"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -60,10 +59,6 @@ type PullRequestsCommentMutation struct {
 }
 
 func main() {
-	wasteHttp.Serve()
-}
-
-func main2() {
 	fmt.Printf("Hello, world.\n")
 
 	clio := helpers.CLIOptions{}
@@ -71,10 +66,10 @@ func main2() {
 	helpers.Config = clio
 	helpers.InitArtifactDetails()
 
-	owner := "w**-system"
-	name := "dbutils"
+	owner := helpers.Config.GithubOwner
+	repoName := helpers.Config.GithubRepo
 
-	q, err := fetchRepoDescription(context.Background(), owner, name)
+	q, err := fetchRepoDescription(context.Background(), owner, repoName)
 	if err != nil {
 		// Handle error.
 		log.Fatal(err)
@@ -89,7 +84,7 @@ func main2() {
 		fmt.Printf("%d) %s is numbered: %d\n ", i, pr.Title, pr.Number)
 		if pr.Reviews.TotalCount >= 1 {
 			fmt.Printf("found an approved PR - do it and then mutate it!!\n")
-			go executePullRequest(name, owner, pr, httpClient)
+			go executePullRequest(repoName, owner, pr, httpClient)
 
 			// https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button
 			// not sure if I should also close using https://developer.github.com/v3/pulls/#update-a-pull-request or is it done...
