@@ -1,24 +1,24 @@
 package helpers
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 
-	"github.com/gorilla/mux"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/outbrain/golib/log"
 )
 
 // consider adding: _ "net/http/pprof"?
 
 var Config CLIOptions
 
-func CreateChangeEndpoint(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
+func CreateChangeEndpoint(c *gin.Context) {
+	ID, _ := strconv.Atoi(c.Param("id"))
 	var change Change
-	_ = json.NewDecoder(req.Body).Decode(&change)
-	ID := params["id"]
-	fmt.Printf("%s, %s\n", ID, change)
+	c.ShouldBind(&change)
+	fmt.Printf("%d, %s\n", ID, change)
 	changes = append(changes, change)
 
 	c1 := make(chan string)
@@ -27,29 +27,28 @@ func CreateChangeEndpoint(w http.ResponseWriter, req *http.Request) {
 	clusterID := <-c1
 	GetArtifactServerDuo(c2, clusterID)
 
-	fmt.Println("received clusterId: ", clusterID)
+	log.Info("received clusterId: ", clusterID)
 	masterHost := <-c2
-	fmt.Println("received master host: ", masterHost)
+	log.Info("received master host: ", masterHost)
 
 	change.RunChange(masterHost)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(changes); err != nil {
-		panic(err)
-	}
+	c.JSON(http.StatusOK, gin.H{"changes": changes})
 }
 
 var changes []Change
 
 // StartWebServer starts the web API
 func StartWebServer() {
-	router := mux.NewRouter()
+
+	router := gin.Default()
 	// people = append(people, Person{ID: "1", Firstname: "Nic", Lastname: "Raboy", Address: &Address{City: "Dublin", State: "CA"}})
 	// people = append(people, Person{ID: "2", Firstname: "Maria", Lastname: "Raboy"})
 	// router.HandleFunc("/people", GetPeopleEndpoint).Methods("GET")
 	// router.HandleFunc("/people/{id}", GetPersonEndpoint).Methods("GET")
-	router.HandleFunc("/change/{id}", CreateChangeEndpoint).Methods("POST")
+	router.POST("/change/:id", CreateChangeEndpoint)
 	// router.HandleFunc("/people/{id}", DeletePersonEndpoint).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(Config.WebAddress, router))
+
+	router.Run()
+
 }

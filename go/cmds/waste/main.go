@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/cohenjo/waste/go/helpers"
+	wasteHttp "github.com/cohenjo/waste/go/http"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -59,6 +60,10 @@ type PullRequestsCommentMutation struct {
 }
 
 func main() {
+	wasteHttp.Serve()
+}
+
+func main2() {
 	fmt.Printf("Hello, world.\n")
 
 	clio := helpers.CLIOptions{}

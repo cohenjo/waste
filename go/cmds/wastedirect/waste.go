@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/cohenjo/waste/go/helpers"
 	"github.com/outbrain/golib/log"
 )
@@ -16,14 +14,15 @@ import (
 // drop primary key, drop key name_uidx, create primary key(name), create unique key id_uidx(id) - swapping the two keys. gh-ost is still happy because id is still unique in both tables. So is name.
 
 func main() {
-	fmt.Printf("Hello, world.\n")
-	log.SetLevel(log.ERROR)
 
+	log.SetLevel(log.INFO)
+
+	log.Infof("Hello, world.\n")
 	clio := helpers.CLIOptions{}
 	clio.ReadArgs()
 
 	helpers.Config = clio
-	helpers.InitArtifactDetails()
+	helpers.InitArtifactDetails() // need to fix some bug in chef data bags...
 	helpers.StartWebServer()
 
 	// gh-ost \

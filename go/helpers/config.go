@@ -61,7 +61,7 @@ func (clio *CLIOptions) ReadArgs() {
 		return
 	}
 
-	log.SetLevel(log.ERROR)
+	log.SetLevel(log.INFO)
 	if *verbose {
 		log.SetLevel(log.INFO)
 	}

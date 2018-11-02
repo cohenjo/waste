@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chef/chef"
 	"github.com/go-redis/redis"
+	"github.com/outbrain/golib/log"
 )
 
 // Details is the artifact details
@@ -24,14 +25,18 @@ type ArtifactDetails map[string]Details
 var m ArtifactDetails
 
 func InitArtifactDetails() {
+
 	// m := make(ArtifactDetails)
 
 	// read a client key
 	key, err := ioutil.ReadFile(Config.ChefKey)
 	if err != nil {
-		fmt.Println("Couldn't read key.pem:", err)
+		log.Error("Couldn't read key.pem:", err)
 		os.Exit(1)
 	}
+	log.Debugf("the KEY: %s\n", string(key))
+	log.Debugf("the URL: %s\n", Config.ChefBaseURL)
+	log.Debugf("the USER: %s\n", Config.ChefUser)
 
 	// build a client
 	client, err := chef.NewClient(&chef.Config{
@@ -41,7 +46,7 @@ func InitArtifactDetails() {
 		BaseURL: Config.ChefBaseURL,
 	})
 	if err != nil {
-		fmt.Println("Issue setting up client:", err)
+		log.Error("Issue setting up client:", err)
 		os.Exit(1)
 	}
 
@@ -52,22 +57,23 @@ func InitArtifactDetails() {
 	})
 
 	pong, err := rclient.Ping().Result()
-	fmt.Println(pong, err)
+	log.Infof(pong, err)
 
 	val2, err := rclient.Get("last_sync").Result()
 	if err == redis.Nil {
-		fmt.Println("not synced")
+		log.Infof("not synced")
 	} else if err != nil {
-		panic(err)
+		log.Criticale(err)
 	} else {
-		fmt.Printf("last_sync: %s, good enough \n", val2)
-		return
+		log.Infof("last_sync: %s, good enough \n", val2)
+		// return
 	}
 
-	// List Cookbooks
+	// List MySQL data bag items
+
 	dbgList, err := client.DataBags.ListItems("mysql")
 	if err != nil {
-		fmt.Println("Issue listing bags:", err)
+		log.Critical("Issue listing bags:", err)
 	}
 
 	// Print out the list
