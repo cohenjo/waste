@@ -46,6 +46,8 @@ func (clio *CLIOptions) ReadArgs() {
 	flag.StringVar(&clio.OrcUsername, "OrcUsername", "", "Orchestrator username")
 	flag.StringVar(&clio.OrcPasswd, "OrcPasswd", "", "Orchestrator password")
 	flag.StringVar(&clio.GithubToken, "GithubToken", "", "Github Token")
+	flag.StringVar(&clio.GithubOwner, "GithubOwner", "", "Github Owner")
+	flag.StringVar(&clio.GithubRepo, "GithubRepo", "", "Github Repo")
 	flag.StringVar(&clio.WebAddress, "WebAddress", "", "address for the web API")
 	quiet := flag.Bool("quiet", false, "quiet")
 	verbose := flag.Bool("verbose", false, "verbose")

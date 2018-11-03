@@ -1,14 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
+
+	"github.com/outbrain/golib/log"
 
 	"github.com/cohenjo/waste/go/helpers"
 	"github.com/shurcooL/githubv4"
@@ -72,7 +72,7 @@ func main() {
 	q, err := fetchRepoDescription(context.Background(), owner, repoName)
 	if err != nil {
 		// Handle error.
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 
 	src := oauth2.StaticTokenSource(
@@ -100,7 +100,7 @@ func executePullRequest(name string, owner string, pr PullRequestDetails, httpCl
 
 	resp, err := httpClient.Get(fmt.Sprintf(url_template, owner, name, pr.Number))
 	if err != nil {
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 
 	defer resp.Body.Close()
@@ -108,7 +108,7 @@ func executePullRequest(name string, owner string, pr PullRequestDetails, httpCl
 	var cfs ChangedFiles
 	err = json.Unmarshal(body, &cfs)
 	if err != nil {
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 
 	for index, element := range cfs {
@@ -128,24 +128,24 @@ func executePullRequest(name string, owner string, pr PullRequestDetails, httpCl
 		go helpers.GetArtifactServerDuo(c2, clusterID)
 		masterHost := <-c2
 
-		fmt.Println("received clusterId: ", clusterID)
-		fmt.Println("received master host: ", masterHost)
+		log.Infof("received clusterId: ", clusterID)
+		log.Infof("received master host: ", masterHost)
 
-		// fmt.Printf("%s\n", masterHost)
-		res, err := cng.RunChange(masterHost)
-		if err != nil {
-			// log.Fatal(err)
-		}
-		log.Printf("res: %s \n", res)
-		commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
+		log.Infof("%s\n", masterHost)
+		// res, err := cng.RunChange(masterHost)
+		// if err != nil {
+		// 	log.Criticale(err)
+		// }
+		// log.Info("res: %s \n", res)
+		// commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
 
 	}
-	log.Print("Amazing! change was done - merge & close the pull request")
+	log.Info("Amazing! change was done - merge & close the pull request")
 	// PUT /repos/:owner/:repo/pulls/:number/merge
-	merge_template := "https://api.github.com/repos/%s/%s/pulls/%d/merge"
-	var jsonStr = []byte(`{"commit_title":"you've been wasted."}`)
-	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf(merge_template, owner, name, pr.Number), bytes.NewBuffer(jsonStr))
-	resp, err = httpClient.Do(req)
+	// merge_template := "https://api.github.com/repos/%s/%s/pulls/%d/merge"
+	// var jsonStr = []byte(`{"commit_title":"you've been wasted."}`)
+	// req, err := http.NewRequest(http.MethodPut, fmt.Sprintf(merge_template, owner, name, pr.Number), bytes.NewBuffer(jsonStr))
+	// resp, err = httpClient.Do(req)
 
 }
 

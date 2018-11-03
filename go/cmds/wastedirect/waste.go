@@ -22,7 +22,7 @@ func main() {
 	clio.ReadArgs()
 
 	helpers.Config = clio
-	helpers.InitArtifactDetails() // need to fix some bug in chef data bags...
+	helpers.InitArtifactDetails()
 	helpers.StartWebServer()
 
 	// gh-ost \

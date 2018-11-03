@@ -12,6 +12,8 @@ OrcPasswd dba_password
 
 #Github token for integration
 GithubToken some_secret_token
+GithubOwner owner-or-org
+GithubRepo artifact-schema
 
 WebAddress :8080
 
