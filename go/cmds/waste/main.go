@@ -75,8 +75,11 @@ func main() {
 		log.Criticale(err)
 	}
 
+	token := helpers.Config.GithubToken
+	// os.Getenv("GITHUB_TOKEN")
+
 	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 
@@ -173,9 +176,11 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPull
 		"name":       githubv4.String(name),
 		"pullsFirst": githubv4.NewInt(3),
 	}
+	token := helpers.Config.GithubToken
+	// os.Getenv("GITHUB_TOKEN")
 
 	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 

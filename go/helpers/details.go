@@ -66,7 +66,7 @@ func InitArtifactDetails() {
 		log.Criticale(err)
 	} else {
 		log.Infof("last_sync: %s, good enough \n", val2)
-		// return
+		return
 	}
 
 	// List MySQL data bag items
