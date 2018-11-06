@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 	// "github.com/graphql-go/relay/examples/starwars"
+	// "github.com/github/orchestrator/go/inst" - see this for the instance type we get back from Orch
 )
 
 type Server struct {
@@ -50,7 +51,7 @@ func GetArtifactServerDuo(serverChannel chan<- *Server, clusterID string) {
 	err = json.Unmarshal(body, &objmap)
 
 	// fmt.Printf("map: %s \n", objmap)
-	tm := objmap.(map[string]interface{})["MasterKey"]
+	tm := objmap.(map[string]interface{})["Key"]
 	// fmt.Printf("tm: %s \n", tm)
 	var masterServer = toServer(tm.(map[string]interface{}))
 	fmt.Printf("Master host: %s, port: %d \n", masterServer.HostName, masterServer.Port)

@@ -20,9 +20,12 @@ type ChangedFile struct {
 	Filename     string
 	Status       string
 	Additions    int
+	deletions    int
+	changes      int
+	blob_url     string
 	Raw_url      string
 	Contents_url string
-	Blob_url     string
+	patch        string
 }
 
 type ChangedFiles []ChangedFile
@@ -60,6 +63,7 @@ type PullRequestsCommentMutation struct {
 
 func main() {
 	fmt.Printf("Hello, world.\n")
+	log.SetLevel(log.INFO)
 
 	clio := helpers.CLIOptions{}
 	clio.ReadArgs()
@@ -85,9 +89,9 @@ func main() {
 
 	for i, pr := range q.Repository.PullRequests.Nodes {
 		fmt.Printf("%d) %s is numbered: %d\n ", i, pr.Title, pr.Number)
-		if pr.Reviews.TotalCount >= 1 {
+		if pr.Reviews.TotalCount >= 0 {
 			fmt.Printf("found an approved PR - do it and then mutate it!!\n")
-			go executePullRequest(repoName, owner, pr, httpClient)
+			executePullRequest(repoName, owner, pr, httpClient)
 
 			// https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button
 			// not sure if I should also close using https://developer.github.com/v3/pulls/#update-a-pull-request or is it done...
@@ -97,6 +101,7 @@ func main() {
 
 }
 
+// TODO - consider using: https://developer.github.com/v4/previews/#pull-requests-preview
 func executePullRequest(name string, owner string, pr PullRequestDetails, httpClient *http.Client) {
 	// For now we'll need to use GET /repos/:owner/:repo/pulls/:number/files to get the files...
 	url_template := "https://api.github.com/repos/%s/%s/pulls/%d/files"
@@ -135,12 +140,12 @@ func executePullRequest(name string, owner string, pr PullRequestDetails, httpCl
 		log.Infof("received master host: ", masterHost)
 
 		log.Infof("%s\n", masterHost)
-		// res, err := cng.RunChange(masterHost)
-		// if err != nil {
-		// 	log.Criticale(err)
-		// }
-		// log.Info("res: %s \n", res)
-		// commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
+		res, err := cng.RunChange(masterHost)
+		if err != nil {
+			log.Criticale(err)
+		}
+		log.Info("res: %s \n", res)
+		commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
 
 	}
 	log.Info("Amazing! change was done - merge & close the pull request")
@@ -204,8 +209,9 @@ func commentPullRequest(ctx context.Context, message, name string, id githubv4.I
 	aci.Body = githubv4.String(message)
 	aci.SubjectID = githubv4.ID(id)
 
+	token := helpers.Config.GithubToken
 	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 

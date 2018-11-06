@@ -30,8 +30,6 @@ type CLIOptions struct {
 }
 
 func (clio *CLIOptions) ReadArgs() {
-	log.SetLevel(log.ERROR)
-
 	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
 	flag.StringVar(&clio.AlterStatement, "artifact", "", "full artifact (mandatory)")
 	flag.StringVar(&clio.DBUser, "DBUser", "", "MySQL user")

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/outbrain/golib/log"
 )
 
@@ -78,8 +79,8 @@ func (cng *Change) RunChange(masterHost *Server) (string, error) {
 	case "create":
 		log.Infof("create new table - will be processed by CREATOR")
 		res, err = RunTableCreate(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
-	// case "alter":
-	// 	fmt.Println("alter existing table - will be processed by GH-OST")
+	case "alter":
+		fmt.Println("alter existing table - will be processed by GH-OST")
 	// 	res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
 	default:
 		fmt.Println("You're an idiot - I'll just ignore and wait for you to go away")
