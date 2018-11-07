@@ -5,19 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 
 	"github.com/cohenjo/waste/go/helpers"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/outbrain/golib/log"
 	"github.com/shurcooL/githubv4"
-	"golang.org/x/oauth2"
 )
 
 func main() {
-	fmt.Printf("Hello, world.\n")
+
 	log.SetLevel(log.INFO)
+	log.Infof("WASTE: Hello, world.\n")
 
 	clio := helpers.CLIOptions{}
 	clio.ReadArgs()
@@ -29,43 +28,33 @@ func main() {
 
 	q, err := fetchRepoDescription(context.Background(), owner, repoName)
 	if err != nil {
-		// Handle error.
 		log.Criticale(err)
 	}
-
-	token := helpers.Config.GithubToken
-	// os.Getenv("GITHUB_TOKEN")
-
-	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	httpClient := oauth2.NewClient(context.Background(), src)
 
 	for i, pr := range q.Repository.PullRequests.Nodes {
 		fmt.Printf("%d) %s is numbered: %d\n ", i, pr.Title, pr.Number)
 		if pr.Reviews.TotalCount >= 1 {
 			fmt.Printf("found an approved PR - do it and then mutate it!!\n")
-			if clio.Execute {
-				fmt.Printf("let's execute!")
-				executePullRequest(repoName, owner, pr, httpClient)
-			} else {
-				fmt.Printf("don't execute!")
-			}
+			executePullRequest(repoName, owner, pr, clio.Execute)
 
 			// https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button
 			// not sure if I should also close using https://developer.github.com/v3/pulls/#update-a-pull-request or is it done...
 
+		} else if pr.Reviews.TotalCount == 0 {
+			log.Infof("Found PR which Needs Review: %s, %d\n", pr.Title, pr.Number)
 		}
 	}
 
 }
 
 // TODO - consider using: https://developer.github.com/v4/previews/#pull-requests-preview
-func executePullRequest(name string, owner string, pr types.PullRequestDetails, httpClient *http.Client) {
+func executePullRequest(name string, owner string, pr types.PullRequestDetails, execute bool) {
 	// For now we'll need to use GET /repos/:owner/:repo/pulls/:number/files to get the files...
-	url_template := "https://api.github.com/repos/%s/%s/pulls/%d/files"
 
-	resp, err := httpClient.Get(fmt.Sprintf(url_template, owner, name, pr.Number))
+	httpClient := helpers.GetHttpClient()
+	urlTemplate := "https://api.github.com/repos/%s/%s/pulls/%d/files"
+
+	resp, err := httpClient.Get(fmt.Sprintf(urlTemplate, owner, name, pr.Number))
 	if err != nil {
 		log.Criticale(err)
 	}
@@ -79,12 +68,12 @@ func executePullRequest(name string, owner string, pr types.PullRequestDetails, 
 	}
 
 	for index, element := range cfs {
-		fmt.Printf("%d ) %s\n", index, element.Filename)
+		log.Infof("%d ) %s\n", index, element.Filename)
 		// fmt.Printf("%d ) %s\n", index, element)
 		var cng helpers.Change
 		cng.ReadFromURL(element.Contents_url, httpClient)
 
-		fmt.Printf("%s\n", cng.SQLCmd)
+		log.Infof("%s\n", cng.SQLCmd)
 
 		c1 := make(chan string)
 		c2 := make(chan *helpers.Server)
@@ -99,12 +88,17 @@ func executePullRequest(name string, owner string, pr types.PullRequestDetails, 
 		log.Infof("received master host: ", masterHost)
 
 		log.Infof("%s\n", masterHost)
-		res, err := cng.RunChange(masterHost)
-		if err != nil {
-			log.Criticale(err)
+		log.Infof("%v\n", cng)
+		if execute {
+			res, err := cng.RunChange(masterHost)
+			if err != nil {
+				log.Criticale(err)
+			}
+			log.Info("res: %s \n", res)
+			commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
+		} else {
+			fmt.Printf("don't execute!")
 		}
-		log.Info("res: %s \n", res)
-		commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
 
 	}
 	log.Info("Amazing! change was done - merge & close the pull request")
@@ -140,17 +134,8 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (types.Approv
 		"name":       githubv4.String(name),
 		"pullsFirst": githubv4.NewInt(3),
 	}
-	token := helpers.Config.GithubToken
-	// os.Getenv("GITHUB_TOKEN")
 
-	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	httpClient := oauth2.NewClient(context.Background(), src)
-
-	client := githubv4.NewClient(httpClient)
-
-	err := client.Query(ctx, &q, variables)
+	err := helpers.QueryGithub(ctx, &q, variables)
 	if err != nil {
 		fmt.Println("Failed to query GitHub API v4:", err)
 		return q, err
@@ -168,11 +153,7 @@ func commentPullRequest(ctx context.Context, message, name string, id githubv4.I
 	aci.Body = githubv4.String(message)
 	aci.SubjectID = githubv4.ID(id)
 
-	token := helpers.Config.GithubToken
-	src := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	httpClient := oauth2.NewClient(context.Background(), src)
+	httpClient := helpers.GetHttpClient()
 
 	client := githubv4.NewClient(httpClient)
 

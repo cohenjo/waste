@@ -9,7 +9,7 @@ import (
 
 	"github.com/github/gh-ost/go/base"
 	"github.com/github/gh-ost/go/logic"
-	_ "github.com/go-sql-driver/mysql"
+	// _ "github.com/go-sql-driver/mysql"
 	"github.com/outbrain/golib/log"
 )
 
@@ -84,6 +84,9 @@ func (cng *Change) RunChange(masterHost *Server) (string, error) {
 	case "alter":
 		fmt.Println("alter existing table - will be processed by GH-OST")
 		res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
+	case "drop":
+		log.Infof("drop a table - You're likely an idiot - i'll keep it for now")
+		res, err = RunTableRename(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName)
 	default:
 		fmt.Println("You're an idiot - I'll just ignore and wait for you to go away")
 	}
@@ -138,7 +141,52 @@ func RunTableCreate(user string, passwd string, dbhost string, port int, dbname 
 
 }
 
-// // GetArtifactServerDuo return a master/replica duo used to later change schema in with gh-ost
+/**
+* RunTableRename renames a table to keep it
+* @todo: choose and implement cleanup policy
+* @body: something will eventually need to remove these tables.
+ */
+func RunTableRename(user string, passwd string, dbhost string, port int, dbname string, tablename string) (string, error) {
+
+	log.Info("user: %s, pass: %s \n", user, passwd)
+	DBUrl := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?interpolateParams=true&autocommit=true&charset=utf8mb4,utf8,latin1", user, passwd, dbhost, port, dbname)
+	db, err := sql.Open("mysql", DBUrl)
+	defer db.Close()
+	if err != nil {
+		log.Fatal("failed to open DB", err)
+	}
+	err = db.Ping()
+	if err != nil {
+		// do something here
+		log.Info("can't connect.\n")
+	}
+
+	result, err := db.Exec("select 1 from dual")
+	if err != nil {
+		// do something here
+
+		log.Infof("%v", err)
+		log.Info("can't select dual")
+	} else {
+		log.Infof("%v", result)
+	}
+	var msg string
+	altercmd := fmt.Sprintf("ALTER TABLE %s RENAME TO WASTE_bck_%s;", tablename, tablename)
+	result, err = db.Exec(altercmd)
+	if err != nil {
+		// do something here
+		log.Info("can't rename table.\n")
+		log.Infof("%v", err)
+		msg = err.Error()
+	} else {
+		log.Infof("%v", result)
+		msg = "change done"
+	}
+
+	return msg, err
+}
+
+// GetArtifactServerDuo return a master/replica duo used to later change schema in with gh-ost
 func RunGHOstChange(user string, passwd string, dbhost string, port int, dbname string, tablename string, altercmd string) (string, error) {
 
 	migrationContext := base.GetMigrationContext()

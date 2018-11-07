@@ -1,12 +1,17 @@
 package helpers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
 	"net/http"
 	"time"
+
+	"github.com/outbrain/golib/log"
+	"github.com/shurcooL/githubv4"
+	"golang.org/x/oauth2"
 	// "github.com/graphql-go/relay/examples/starwars"
 	// "github.com/github/orchestrator/go/inst" - see this for the instance type we get back from Orch
 )
@@ -38,13 +43,13 @@ func GetArtifactServerDuo(serverChannel chan<- *Server, clusterID string) {
 	req.SetBasicAuth(username, passwd)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 	// fmt.Printf("%s", body)
 	var objmap interface{}
@@ -56,13 +61,15 @@ func GetArtifactServerDuo(serverChannel chan<- *Server, clusterID string) {
 	var masterServer = toServer(tm.(map[string]interface{}))
 	fmt.Printf("Master host: %s, port: %d \n", masterServer.HostName, masterServer.Port)
 
+	// consider using  "cluster-osc-slaves/:clusterHint" as the hosts - see
+
 	// We have the master now let's get his replica!
 	rep_templte := "http://%s/instance-replicas/%s/%d"
 	rreq, err := http.NewRequest("GET", fmt.Sprintf(rep_templte, orcBaseApi, masterServer.HostName, masterServer.Port), nil)
 	rreq.SetBasicAuth(username, passwd)
 	resp, err = client.Do(rreq)
 	if err != nil {
-		log.Fatal(err)
+		log.Criticale(err)
 	}
 
 	defer resp.Body.Close()
@@ -82,4 +89,25 @@ func toServer(i map[string]interface{}) *Server {
 	return &Server{
 		HostName: i["Hostname"].(string),
 		Port:     int(i["Port"].(float64))}
+}
+
+func GetHttpClient() *http.Client {
+	token := Config.GithubToken
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+	return httpClient
+}
+
+func QueryGithub(ctx context.Context, q interface{}, variables map[string]interface{}) error {
+
+	httpClient := GetHttpClient()
+	client := githubv4.NewClient(httpClient)
+
+	err := client.Query(ctx, q, variables)
+	if err != nil {
+		log.Critical("Failed to query GitHub API v4:", err)
+	}
+	return err
 }
