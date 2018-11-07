@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/github/gh-ost/go/base"
+	"github.com/github/gh-ost/go/logic"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/outbrain/golib/log"
 )
@@ -81,7 +83,7 @@ func (cng *Change) RunChange(masterHost *Server) (string, error) {
 		res, err = RunTableCreate(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
 	case "alter":
 		fmt.Println("alter existing table - will be processed by GH-OST")
-	// 	res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
+		res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
 	default:
 		fmt.Println("You're an idiot - I'll just ignore and wait for you to go away")
 	}
@@ -137,78 +139,77 @@ func RunTableCreate(user string, passwd string, dbhost string, port int, dbname 
 }
 
 // // GetArtifactServerDuo return a master/replica duo used to later change schema in with gh-ost
-// func RunGHOstChange(user string, passwd string, dbhost string, port int, dbname string, tablename string, altercmd string) (string, error) {
-// 	log.SetLevel(log.ERROR)
+func RunGHOstChange(user string, passwd string, dbhost string, port int, dbname string, tablename string, altercmd string) (string, error) {
 
-// 	migrationContext := base.GetMigrationContext()
+	migrationContext := base.GetMigrationContext()
 
-// 	migrationContext.CliUser = user
-// 	migrationContext.CliPassword = passwd
-// 	migrationContext.InspectorConnectionConfig.Key.Hostname = dbhost
-// 	migrationContext.AssumeMasterHostname = dbhost
-// 	migrationContext.InspectorConnectionConfig.Key.Port = port
-// 	migrationContext.DatabaseName = dbname
-// 	migrationContext.OriginalTableName = tablename
-// 	migrationContext.CountTableRows = false
-// 	migrationContext.NullableUniqueKeyAllowed = false
-// 	migrationContext.ApproveRenamedColumns = false
-// 	migrationContext.SkipRenamedColumns = false
-// 	migrationContext.IsTungsten = false
-// 	migrationContext.DiscardForeignKeys = false
-// 	migrationContext.SkipForeignKeyChecks = false
-// 	migrationContext.TestOnReplica = false
-// 	migrationContext.MigrateOnReplica = false
-// 	migrationContext.OkToDropTable = false
-// 	migrationContext.InitiallyDropOldTable = true
-// 	migrationContext.InitiallyDropGhostTable = true
-// 	migrationContext.DropServeSocket = true
-// 	migrationContext.TimestampOldTable = false
+	migrationContext.CliUser = user
+	migrationContext.CliPassword = passwd
+	migrationContext.InspectorConnectionConfig.Key.Hostname = dbhost
+	migrationContext.AssumeMasterHostname = dbhost
+	migrationContext.InspectorConnectionConfig.Key.Port = port
+	migrationContext.DatabaseName = dbname
+	migrationContext.OriginalTableName = tablename
+	migrationContext.CountTableRows = false
+	migrationContext.NullableUniqueKeyAllowed = false
+	migrationContext.ApproveRenamedColumns = false
+	migrationContext.SkipRenamedColumns = false
+	migrationContext.IsTungsten = false
+	migrationContext.DiscardForeignKeys = false
+	migrationContext.SkipForeignKeyChecks = false
+	migrationContext.TestOnReplica = false
+	migrationContext.MigrateOnReplica = false
+	migrationContext.OkToDropTable = false
+	migrationContext.InitiallyDropOldTable = true
+	migrationContext.InitiallyDropGhostTable = true
+	migrationContext.DropServeSocket = true
+	migrationContext.TimestampOldTable = false
 
-// 	migrationContext.AssumeRBR = true
-// 	migrationContext.SwitchToRowBinlogFormat = false
-// 	migrationContext.AlterStatement = altercmd
-// 	migrationContext.AllowedRunningOnMaster = true
-// 	migrationContext.AllowedMasterMaster = true
-// 	migrationContext.ReplicaServerId = 99999
-// 	migrationContext.ServeTCPPort = 0
-// 	migrationContext.ServeSocketFile = ""
+	migrationContext.AssumeRBR = true
+	migrationContext.SwitchToRowBinlogFormat = false
+	migrationContext.AlterStatement = altercmd
+	migrationContext.AllowedRunningOnMaster = true
+	migrationContext.AllowedMasterMaster = true
+	migrationContext.ReplicaServerId = 99999
+	migrationContext.ServeTCPPort = 0
+	migrationContext.ServeSocketFile = ""
 
-// 	niceRatio := float64(0)
-// 	chunkSize := int64(1000)
-// 	dmlBatchSize := int64(100)
-// 	executeFlag := true
-// 	maxLagMillis := int64(1500)
-// 	cutOverLockTimeoutSeconds := int64(3)
-// 	migrationContext.CutOverType = base.CutOverAtomic
+	niceRatio := float64(0)
+	chunkSize := int64(1000)
+	dmlBatchSize := int64(100)
+	executeFlag := true
+	maxLagMillis := int64(1500)
+	cutOverLockTimeoutSeconds := int64(3)
+	migrationContext.CutOverType = base.CutOverAtomic
 
-// 	migrationContext.CriticalLoadIntervalMilliseconds = int64(0)
-// 	migrationContext.CriticalLoadHibernateSeconds = int64(0)
-// 	migrationContext.SetHeartbeatIntervalMilliseconds(100)
-// 	migrationContext.SetNiceRatio(niceRatio)
-// 	migrationContext.SetChunkSize(chunkSize)
-// 	migrationContext.SetDMLBatchSize(dmlBatchSize)
-// 	migrationContext.SetMaxLagMillisecondsThrottleThreshold(maxLagMillis)
-// 	migrationContext.SetThrottleQuery("")
-// 	migrationContext.SetThrottleHTTP("")
-// 	migrationContext.SetDefaultNumRetries(60)
-// 	migrationContext.ApplyCredentials()
-// 	if err := migrationContext.SetCutOverLockTimeoutSeconds(cutOverLockTimeoutSeconds); err != nil {
-// 		log.Errore(err)
-// 	}
+	migrationContext.CriticalLoadIntervalMilliseconds = int64(0)
+	migrationContext.CriticalLoadHibernateSeconds = int64(0)
+	migrationContext.SetHeartbeatIntervalMilliseconds(100)
+	migrationContext.SetNiceRatio(niceRatio)
+	migrationContext.SetChunkSize(chunkSize)
+	migrationContext.SetDMLBatchSize(dmlBatchSize)
+	migrationContext.SetMaxLagMillisecondsThrottleThreshold(maxLagMillis)
+	migrationContext.SetThrottleQuery("")
+	migrationContext.SetThrottleHTTP("")
+	migrationContext.SetDefaultNumRetries(60)
+	migrationContext.ApplyCredentials()
+	if err := migrationContext.SetCutOverLockTimeoutSeconds(cutOverLockTimeoutSeconds); err != nil {
+		log.Errore(err)
+	}
 
-// 	if migrationContext.ServeSocketFile == "" {
-// 		migrationContext.ServeSocketFile = fmt.Sprintf("/tmp/gh-ost.%s.%s.sock", migrationContext.DatabaseName, migrationContext.OriginalTableName)
-// 	}
+	if migrationContext.ServeSocketFile == "" {
+		migrationContext.ServeSocketFile = fmt.Sprintf("/tmp/gh-ost.%s.%s.sock", migrationContext.DatabaseName, migrationContext.OriginalTableName)
+	}
 
-// 	migrationContext.Noop = !(executeFlag)
-// 	log.Infof("starting gh-ost %+v", AppVersion)
-// 	acceptSignals(migrationContext)
+	migrationContext.Noop = !(executeFlag)
+	log.Infof("starting gh-ost %+v", AppVersion)
+	// acceptSignals(migrationContext)
 
-// 	migrator := logic.NewMigrator()
-// 	err := migrator.Migrate()
-// 	if err != nil {
-// 		migrator.ExecOnFailureHook()
-// 		log.Fatale(err)
-// 	}
-// 	return "Done", err
-// }
+	migrator := logic.NewMigrator()
+	err := migrator.Migrate()
+	if err != nil {
+		migrator.ExecOnFailureHook()
+		log.Fatale(err)
+	}
+	return "Done", err
+}
