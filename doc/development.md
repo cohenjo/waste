@@ -14,3 +14,11 @@ for dev as we reach from a different network please create a user, e.g.:
 create some configuration `./conf/waste.conf` - you can see the sample and just put correct stuff there.
 run:  
 `go run go/cmds/wastedirect/waste.go --config ./conf/waste.conf`
+
+after completion we need to delete the remote and local branch.
+remote can be easily deleted via the pull request
+the local can be cleared via:
+`git pull -p`
+or explicitly using:
+`git branch -d the_local_branch`
+

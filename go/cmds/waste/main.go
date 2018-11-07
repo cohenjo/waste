@@ -8,58 +8,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/outbrain/golib/log"
-
 	"github.com/cohenjo/waste/go/helpers"
+	"github.com/cohenjo/waste/go/types"
+	"github.com/outbrain/golib/log"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
-
-type ChangedFile struct {
-	Sha          string
-	Filename     string
-	Status       string
-	Additions    int
-	deletions    int
-	changes      int
-	blob_url     string
-	Raw_url      string
-	Contents_url string
-	patch        string
-}
-
-type ChangedFiles []ChangedFile
-
-type PullRequestDetails struct {
-	Id      githubv4.ID
-	Title   githubv4.String
-	Number  githubv4.Int
-	Reviews struct {
-		TotalCount githubv4.Int
-	} `graphql:"reviews(states:APPROVED)"`
-}
-
-// ApprovedPullRequestsQuery represents all open, approved pull requests
-type ApprovedPullRequestsQuery struct {
-	Repository struct {
-		DatabaseID   githubv4.Int
-		URL          githubv4.URI
-		PullRequests struct {
-			Nodes    []PullRequestDetails
-			PageInfo struct {
-				EndCursor   githubv4.String
-				HasNextPage githubv4.Boolean
-			}
-		} `graphql:"pullRequests(first:$pullsFirst,states:OPEN)"`
-	} `graphql:"repository(owner: $owner, name: $name)"`
-}
-
-// PullRequestsCommentMutation represents a change to pull request comments
-type PullRequestsCommentMutation struct {
-	AddComment struct {
-		ClientMutationID githubv4.String
-	} `graphql:"addComment(input: $input)"`
-}
 
 func main() {
 	fmt.Printf("Hello, world.\n")
@@ -89,9 +43,14 @@ func main() {
 
 	for i, pr := range q.Repository.PullRequests.Nodes {
 		fmt.Printf("%d) %s is numbered: %d\n ", i, pr.Title, pr.Number)
-		if pr.Reviews.TotalCount >= 0 {
+		if pr.Reviews.TotalCount >= 1 {
 			fmt.Printf("found an approved PR - do it and then mutate it!!\n")
-			executePullRequest(repoName, owner, pr, httpClient)
+			if clio.Execute {
+				fmt.Printf("let's execute!")
+				executePullRequest(repoName, owner, pr, httpClient)
+			} else {
+				fmt.Printf("don't execute!")
+			}
 
 			// https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button
 			// not sure if I should also close using https://developer.github.com/v3/pulls/#update-a-pull-request or is it done...
@@ -102,7 +61,7 @@ func main() {
 }
 
 // TODO - consider using: https://developer.github.com/v4/previews/#pull-requests-preview
-func executePullRequest(name string, owner string, pr PullRequestDetails, httpClient *http.Client) {
+func executePullRequest(name string, owner string, pr types.PullRequestDetails, httpClient *http.Client) {
 	// For now we'll need to use GET /repos/:owner/:repo/pulls/:number/files to get the files...
 	url_template := "https://api.github.com/repos/%s/%s/pulls/%d/files"
 
@@ -113,7 +72,7 @@ func executePullRequest(name string, owner string, pr PullRequestDetails, httpCl
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	var cfs ChangedFiles
+	var cfs types.ChangedFiles
 	err = json.Unmarshal(body, &cfs)
 	if err != nil {
 		log.Criticale(err)
@@ -173,8 +132,8 @@ func drill(i interface{}, key string) interface{} {
 }
 
 // fetchRepoDescription fetches description of repo with owner and name.
-func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPullRequestsQuery, error) {
-	var q ApprovedPullRequestsQuery
+func fetchRepoDescription(ctx context.Context, owner, name string) (types.ApprovedPullRequestsQuery, error) {
+	var q types.ApprovedPullRequestsQuery
 
 	variables := map[string]interface{}{
 		"owner":      githubv4.String(owner),
@@ -203,7 +162,7 @@ func fetchRepoDescription(ctx context.Context, owner, name string) (ApprovedPull
 
 // fetchRepoDescription fetches description of repo with owner and name.
 func commentPullRequest(ctx context.Context, message, name string, id githubv4.ID) (string, error) {
-	var q PullRequestsCommentMutation
+	var q types.PullRequestsCommentMutation
 
 	var aci githubv4.AddCommentInput
 	aci.Body = githubv4.String(message)

@@ -27,6 +27,7 @@ type CLIOptions struct {
 	GithubOwner       string
 	GithubRepo        string
 	WebAddress        string
+	Execute           bool
 }
 
 func (clio *CLIOptions) ReadArgs() {
@@ -47,12 +48,14 @@ func (clio *CLIOptions) ReadArgs() {
 	flag.StringVar(&clio.GithubOwner, "GithubOwner", "", "Github Owner")
 	flag.StringVar(&clio.GithubRepo, "GithubRepo", "", "Github Repo")
 	flag.StringVar(&clio.WebAddress, "WebAddress", "", "address for the web API")
+	execute := flag.Bool("execute", false, "should we execute")
 	quiet := flag.Bool("quiet", false, "quiet")
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
 	help := flag.Bool("help", false, "Display usage")
 	flag.CommandLine.SetOutput(os.Stdout)
+	clio.Execute = *execute
 
 	flag.Parse()
 
