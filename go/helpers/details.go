@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -55,9 +56,16 @@ func InitArtifactDetails() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+	var kvstore KVStore
+	if Config.KVStoreType == KVStoreTypeConsul {
+		kvstore = GetConsulStore()
+	}
 
 	pong, err := rclient.Ping().Result()
 	log.Infof(pong, err)
+
+	// val2, err := kvstore.Get("db/artifacts/last_sync")
+	// x, n := binary.Varint(val2)
 
 	val2, err := rclient.Get("last_sync").Result()
 	if err == redis.Nil {
@@ -106,6 +114,19 @@ func InitArtifactDetails() {
 				// 	pass:   "test pass",
 				// }
 
+				key := fmt.Sprintf("db/artifacts/%s/cluster", k)
+				log.Infof("storing for key: %s, value: %v\n", key, []byte(j))
+				err = kvstore.Set(key, []byte(j))
+				if err != nil {
+					log.Criticale(err)
+				}
+
+				// key = fmt.Sprintf("db/artifacts/%s/dbname", dbName)
+				// err = kvstore.Set(key, []byte(j))
+				// if err != nil {
+				// 	log.Criticale(err)
+				// }
+
 				err = rclient.HSet("artdel", k, dbName).Err()
 				if err != nil {
 					panic(err)
@@ -118,7 +139,10 @@ func InitArtifactDetails() {
 			}
 		}
 	}
-
+	buf := make([]byte, binary.MaxVarintLen64)
+	n := binary.PutVarint(buf, time.Now().Unix())
+	fmt.Printf("num of bytes: %d\n", n)
+	err = kvstore.Set("db/artifacts/last_sync", buf)
 	err = rclient.Set("last_sync", time.Now().Unix(), 10*time.Hour).Err()
 	if err != nil {
 		panic(err)

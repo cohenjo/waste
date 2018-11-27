@@ -28,6 +28,10 @@ type CLIOptions struct {
 	GithubRepo        string
 	WebAddress        string
 	Execute           bool
+	KVStoreType       KVStoreType
+	KVStoreAddress    string
+	KVStoreUser       string
+	KVStorePassword   string
 }
 
 func (clio *CLIOptions) ReadArgs() {
@@ -48,6 +52,10 @@ func (clio *CLIOptions) ReadArgs() {
 	flag.StringVar(&clio.GithubOwner, "GithubOwner", "", "Github Owner")
 	flag.StringVar(&clio.GithubRepo, "GithubRepo", "", "Github Repo")
 	flag.StringVar(&clio.WebAddress, "WebAddress", "", "address for the web API")
+	flag.Var(&clio.KVStoreType, "KVStoreType", "KV store type")
+	flag.StringVar(&clio.KVStoreAddress, "KVStoreAddress", "", "Github Repo")
+	flag.StringVar(&clio.KVStoreUser, "KVStoreUser", "", "Github Repo")
+	flag.StringVar(&clio.KVStorePassword, "KVStorePassword", "", "Github Repo")
 	execute := flag.Bool("execute", false, "should we execute")
 	quiet := flag.Bool("quiet", false, "quiet")
 	verbose := flag.Bool("verbose", false, "verbose")

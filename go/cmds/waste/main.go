@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"github.com/cohenjo/waste/go/helpers"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/outbrain/golib/log"
-	"github.com/shurcooL/githubv4"
 )
 
 func main() {
@@ -26,7 +24,10 @@ func main() {
 	owner := helpers.Config.GithubOwner
 	repoName := helpers.Config.GithubRepo
 
-	q, err := fetchRepoDescription(context.Background(), owner, repoName)
+	helpers.GetQueue()
+	fmt.Printf("################################################################################################################\n")
+
+	q, err := helpers.FetchRepoDescription(context.Background(), owner, repoName)
 	if err != nil {
 		log.Criticale(err)
 	}
@@ -95,7 +96,7 @@ func executePullRequest(name string, owner string, pr types.PullRequestDetails, 
 				log.Criticale(err)
 			}
 			log.Info("res: %s \n", res)
-			commentPullRequest(context.Background(), res, "cohenjo", pr.Id)
+			helpers.CommentPullRequest(context.Background(), res, "cohenjo", pr.Id)
 		} else {
 			fmt.Printf("don't execute!")
 		}
@@ -108,71 +109,4 @@ func executePullRequest(name string, owner string, pr types.PullRequestDetails, 
 	// req, err := http.NewRequest(http.MethodPut, fmt.Sprintf(merge_template, owner, name, pr.Number), bytes.NewBuffer(jsonStr))
 	// resp, err = httpClient.Do(req)
 
-}
-
-func describe(i interface{}) {
-	fmt.Printf("(%v, %T)\n", i, i)
-}
-
-func drill(i interface{}, key string) interface{} {
-	switch v := i.(type) {
-	case map[string]interface{}:
-		return v[key]
-	case []interface{}:
-		return drill(v[0], key)
-	default:
-		return ""
-	}
-}
-
-// fetchRepoDescription fetches description of repo with owner and name.
-func fetchRepoDescription(ctx context.Context, owner, name string) (types.ApprovedPullRequestsQuery, error) {
-	var q types.ApprovedPullRequestsQuery
-
-	variables := map[string]interface{}{
-		"owner":      githubv4.String(owner),
-		"name":       githubv4.String(name),
-		"pullsFirst": githubv4.NewInt(3),
-	}
-
-	err := helpers.QueryGithub(ctx, &q, variables)
-	if err != nil {
-		fmt.Println("Failed to query GitHub API v4:", err)
-		return q, err
-	}
-	// printJSON(q)
-
-	return q, err
-}
-
-// fetchRepoDescription fetches description of repo with owner and name.
-func commentPullRequest(ctx context.Context, message, name string, id githubv4.ID) (string, error) {
-	var q types.PullRequestsCommentMutation
-
-	var aci githubv4.AddCommentInput
-	aci.Body = githubv4.String(message)
-	aci.SubjectID = githubv4.ID(id)
-
-	httpClient := helpers.GetHttpClient()
-
-	client := githubv4.NewClient(httpClient)
-
-	err := client.Mutate(ctx, &q, aci, nil)
-	if err != nil {
-		fmt.Println("Failed to query GitHub API v4:", err)
-		return "problem", err
-	}
-	printJSON(q)
-
-	return "done", err
-}
-
-// printJSON prints v as JSON encoded with indent to stdout. It panics on any error.
-func printJSON(v interface{}) {
-	w := json.NewEncoder(os.Stdout)
-	w.SetIndent("", "\t")
-	err := w.Encode(v)
-	if err != nil {
-		panic(err)
-	}
 }

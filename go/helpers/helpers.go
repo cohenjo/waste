@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"net/http"
 	"time"
@@ -110,4 +111,14 @@ func QueryGithub(ctx context.Context, q interface{}, variables map[string]interf
 		log.Critical("Failed to query GitHub API v4:", err)
 	}
 	return err
+}
+
+// printJSON prints v as JSON encoded with indent to stdout. It panics on any error.
+func printJSON(v interface{}) {
+	w := json.NewEncoder(os.Stdout)
+	w.SetIndent("", "\t")
+	err := w.Encode(v)
+	if err != nil {
+		panic(err)
+	}
 }

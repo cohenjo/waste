@@ -1,5 +1,6 @@
 # waste
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/cohenjo/waste)](https://goreportcard.com/report/github.com/cohenjo/waste)
+[![GoDoc](https://godoc.org/github.com/cohenjo/waste?status.svg)](https://godoc.org/github.com/cohenjo/waste)
 [![build status](https://travis-ci.org/cohenjo/waste.svg)](https://travis-ci.org/cohenjo/waste) [![downloads](https://img.shields.io/github/downloads/cohenjo/waste/total.svg)](https://github.com/cohenjo/waste/releases) [![release](https://img.shields.io/github/release/cohenjo/waste.svg)](https://github.com/cohenjo/waste/releases)
 
 #### What artifact schema transformations etc for MySQL <img src="doc/images/waste-logo-light-160.png" align="right">

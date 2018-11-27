@@ -41,6 +41,30 @@ type ApprovedPullRequestsQuery struct {
 	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
+// ApprovedPullRequestsQuery represents all open, $status pull requests
+type PullRequestsQuery struct {
+	Repository struct {
+		DatabaseID   githubv4.Int
+		URL          githubv4.URI
+		PullRequests struct {
+			Nodes []struct {
+				Id      githubv4.ID
+				Title   githubv4.String
+				Merged  githubv4.Boolean
+				Closed  githubv4.Boolean
+				Number  githubv4.Int
+				Reviews struct {
+					TotalCount githubv4.Int
+				}
+			}
+			PageInfo struct {
+				EndCursor   githubv4.String
+				HasNextPage githubv4.Boolean
+			}
+		} `graphql:"pullRequests(first:$pullsFirst)"`
+	} `graphql:"repository(owner: $owner, name: $name)"`
+}
+
 // PullRequestsCommentMutation represents a change to pull request comments
 type PullRequestsCommentMutation struct {
 	AddComment struct {

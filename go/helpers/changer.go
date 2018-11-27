@@ -212,7 +212,6 @@ func RunGHOstChange(user string, passwd string, dbhost string, port int, dbname 
 	migrationContext.InitiallyDropGhostTable = true
 	migrationContext.DropServeSocket = true
 	migrationContext.TimestampOldTable = false
-
 	migrationContext.AssumeRBR = true
 	migrationContext.SwitchToRowBinlogFormat = false
 	migrationContext.AlterStatement = altercmd

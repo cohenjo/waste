@@ -3,6 +3,7 @@
 conf/*.conf
 
 vendor/
-
+resources/
 # dotenv
 .env
+task_store.db
