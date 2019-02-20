@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/cohenjo/waste/go/helpers"
+	"github.com/cohenjo/waste/go/config"
+	helpers "github.com/cohenjo/waste/go/mutators"
 	"github.com/outbrain/golib/log"
 )
 
@@ -18,11 +19,10 @@ func main() {
 	log.SetLevel(log.INFO)
 
 	log.Infof("Hello, world.\n")
-	clio := helpers.CLIOptions{}
+	clio := config.CLIOptions{}
 	clio.ReadArgs()
 
-	helpers.Config = clio
-	helpers.InitArtifactDetails()
+	config.Config = clio
 	helpers.StartWebServer()
 
 	// gh-ost \

@@ -3,8 +3,6 @@ github.com/gin-contrib/sse v0.0.0-20170109093832-22d885f9ecc7 h1:AzN37oI0cOS+cou
 github.com/gin-contrib/sse v0.0.0-20170109093832-22d885f9ecc7/go.mod h1:VJ0WA2NBN22VlZ2dKZQPAPnyWw5XTlK1KymzLKsr59s=
 github.com/gin-gonic/gin v1.3.0 h1:kCmZyPklC0gVdL728E6Aj20uYBJV93nj/TkwBTKhFbs=
 github.com/gin-gonic/gin v1.3.0/go.mod h1:7cKuhb5qV2ggCFctp2fJQ+ErvciLZrIeoOSOm6mUr7Y=
-github.com/github/gh-ost v1.0.47 h1:exaTDIKRcXNDPkXmOfeMhBgSs32dtjluoEe49GfiG24=
-github.com/github/gh-ost v1.0.47/go.mod h1:owPdMQZK1iBTNWZTzlWt2ddOsL3JIbFAJujEgUyK0ag=
 github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411 h1:v52PJ8BcEbDlPQNmu4nEJnfl0ce0l+/AIzsDPPVpUlo=
 github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411/go.mod h1:9UBkcNJTWjbPR4rITaG/7jUPSjv4K6r+T92/X9ATrZs=
 github.com/go-redis/redis v6.14.2+incompatible h1:UE9pLhzmWf+xHNmZsoccjXosPicuiNaInPgym8nzfg0=

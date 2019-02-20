@@ -1,4 +1,4 @@
-package helpers
+package mutators
 
 import (
 	"fmt"
@@ -7,12 +7,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/outbrain/golib/log"
 )
 
 // consider adding: _ "net/http/pprof"?
-
-var Config CLIOptions
 
 func CreateChangeEndpoint(c *gin.Context) {
 	ID, _ := strconv.Atoi(c.Param("id"))
@@ -21,17 +18,17 @@ func CreateChangeEndpoint(c *gin.Context) {
 	fmt.Printf("%d, %s\n", ID, change)
 	changes = append(changes, change)
 
-	c1 := make(chan string)
-	c2 := make(chan *Server)
-	GetArtifactCluster(c1, change.Artifact)
-	clusterID := <-c1
-	GetArtifactServerDuo(c2, clusterID)
+	// c1 := make(chan string)
+	// c2 := make(chan *Server)
+	// GetArtifactCluster(c1, change.Artifact)
+	// clusterID := <-c1
+	// GetArtifactServerDuo(c2, clusterID)
 
-	log.Info("received clusterId: ", clusterID)
-	masterHost := <-c2
-	log.Info("received master host: ", masterHost)
+	// log.Info("received clusterId: ", clusterID)
+	// masterHost := <-c2
+	// log.Info("received master host: ", masterHost)
 
-	change.RunChange(masterHost)
+	change.RunChange()
 
 	c.JSON(http.StatusOK, gin.H{"changes": changes})
 }

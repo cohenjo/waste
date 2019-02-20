@@ -1,4 +1,4 @@
-package helpers
+package config
 
 import (
 	"fmt"
@@ -20,7 +20,6 @@ type CLIOptions struct {
 	ChefBaseURL       string
 	ChefUser          string
 	ChefKey           string
-	OrcBaseAPI        string
 	OrcUsername       string
 	OrcPasswd         string
 	GithubToken       string
@@ -28,11 +27,12 @@ type CLIOptions struct {
 	GithubRepo        string
 	WebAddress        string
 	Execute           bool
-	KVStoreType       KVStoreType
 	KVStoreAddress    string
 	KVStoreUser       string
 	KVStorePassword   string
 }
+
+var Config CLIOptions
 
 func (clio *CLIOptions) ReadArgs() {
 	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
@@ -45,14 +45,13 @@ func (clio *CLIOptions) ReadArgs() {
 	flag.StringVar(&clio.ChefBaseURL, "ChefBaseURL", "", "chef base url")
 	flag.StringVar(&clio.ChefUser, "ChefUser", "", "ChefUser")
 	flag.StringVar(&clio.ChefKey, "ChefKey", "", "The pem key to unlock chef")
-	flag.StringVar(&clio.OrcBaseAPI, "OrcBaseAPI", "", "Orchestrator Base API url")
+
 	flag.StringVar(&clio.OrcUsername, "OrcUsername", "", "Orchestrator username")
 	flag.StringVar(&clio.OrcPasswd, "OrcPasswd", "", "Orchestrator password")
 	flag.StringVar(&clio.GithubToken, "GithubToken", "", "Github Token")
 	flag.StringVar(&clio.GithubOwner, "GithubOwner", "", "Github Owner")
 	flag.StringVar(&clio.GithubRepo, "GithubRepo", "", "Github Repo")
 	flag.StringVar(&clio.WebAddress, "WebAddress", "", "address for the web API")
-	flag.Var(&clio.KVStoreType, "KVStoreType", "KV store type")
 	flag.StringVar(&clio.KVStoreAddress, "KVStoreAddress", "", "Github Repo")
 	flag.StringVar(&clio.KVStoreUser, "KVStoreUser", "", "Github Repo")
 	flag.StringVar(&clio.KVStorePassword, "KVStorePassword", "", "Github Repo")

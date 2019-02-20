@@ -4,7 +4,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-contrib/sse v0.0.0-20170109093832-22d885f9ecc7
 	github.com/gin-gonic/gin v1.3.0
-	github.com/github/gh-ost v1.0.47
 	github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411
 	github.com/go-redis/redis v6.14.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.0

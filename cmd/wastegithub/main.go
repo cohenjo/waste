@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cohenjo/waste/go/helpers"
+	helpers "github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/outbrain/golib/log"
 )
