@@ -17,9 +17,6 @@ type CLIOptions struct {
 	DBPasswd          string
 	Artifact          string
 	AlterStatement    string
-	ChefBaseURL       string
-	ChefUser          string
-	ChefKey           string
 	OrcUsername       string
 	OrcPasswd         string
 	GithubToken       string
@@ -42,10 +39,6 @@ func (clio *CLIOptions) ReadArgs() {
 	flag.StringVar(&clio.DatabaseName, "database", "", "database name (mandatory)")
 	flag.StringVar(&clio.OriginalTableName, "table", "", "table name (mandatory)")
 	flag.StringVar(&clio.AlterStatement, "alter", "", "alter statement (mandatory)")
-	flag.StringVar(&clio.ChefBaseURL, "ChefBaseURL", "", "chef base url")
-	flag.StringVar(&clio.ChefUser, "ChefUser", "", "ChefUser")
-	flag.StringVar(&clio.ChefKey, "ChefKey", "", "The pem key to unlock chef")
-
 	flag.StringVar(&clio.OrcUsername, "OrcUsername", "", "Orchestrator username")
 	flag.StringVar(&clio.OrcPasswd, "OrcPasswd", "", "Orchestrator password")
 	flag.StringVar(&clio.GithubToken, "GithubToken", "", "Github Token")
