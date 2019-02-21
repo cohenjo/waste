@@ -1,0 +1,14 @@
+<!--article.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+
+<!--Display the title of the article-->
+<h1>{{.payload.Name}}</h1>
+
+<!--Display the content of the article-->
+<p>{{.payload.Ipv4}}</p>
+<p>{{.payload.Port}}</p>
+
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}

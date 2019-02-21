@@ -1,0 +1,18 @@
+<!--index.html-->
+
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+
+  <h1>Hello Gin!</h1>
+  {{range .payload }}
+    <!--Create the link for the cluster based on its ID-->
+    <a href="/cluster/view/{{.ID}}">
+      <!--Display the title of the cluster -->
+      <h2>{{.Name}}</h2>
+    </a>
+    <!--Display the content of the cluster-->
+    <p>{{.Ipv4}}</p>
+  {{end}}
+
+<!--Embed the footer.html template at this location-->
+<!-- {{ template "footer.html" .}} -->

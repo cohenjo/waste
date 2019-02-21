@@ -3,7 +3,7 @@
 conf/*.conf
 
 vendor/
-resources/
 # dotenv
+build/dist
 .env
 task_store.db
