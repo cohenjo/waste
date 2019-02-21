@@ -1,0 +1,14 @@
+[Unit]
+Description=waste Daemon
+Documentation=man:some-fake-docs(8)
+
+[Service]
+Type=simple
+PIDFile=/var/run/waste.pid
+LimitNOFILE=65512
+WorkingDirectory=/usr/local/waste
+ExecStart=/usr/local/waste/waste -config=/etc/waste.conf.json  
+
+[Install]
+WantedBy=multi-user.target
+Alias=waste.service
