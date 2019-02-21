@@ -9,8 +9,8 @@ import (
 
 	// _ "github.com/go-sql-driver/mysql"
 	"github.com/cohenjo/waste/go/config"
-	wh "github.com/cohenjo/waste/go/http"
-	"github.com/outbrain/golib/log"
+	wh "github.com/cohenjo/waste/go/utils"
+	"github.com/rs/zerolog/log"
 )
 
 // Change represents a transformation waiting to happen
@@ -81,13 +81,13 @@ func (cng *Change) RunChange() (string, error) {
 	var err error
 	switch cng.ChangeType {
 	case "create":
-		log.Infof("create new table - will be processed by CREATOR")
+		log.Info().Str("Action", "create").Msg("create new table - will be processed by CREATOR")
 		res, err = cng.runTableCreate()
 	// case "alter":
 	// 	fmt.Println("alter existing table - will be processed by GH-OST")
 	// 	res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
 	case "drop":
-		log.Infof("drop a table - You're likely an idiot - i'll keep it for now")
+		log.Info().Str("Action", "drop").Msg("drop a table - You're likely an idiot - i'll keep it for now")
 		res, err = RunTableRename()
 	default:
 		fmt.Println("You're an idiot - I'll just ignore and wait for you to go away")
@@ -99,13 +99,13 @@ func (cng *Change) RunChange() (string, error) {
 func (cng *Change) enrichChange() {
 	data, err := wh.GetBindings(cng.Artifact)
 	if err != nil {
-		log.Fatalf("this is sad... %s, %v", data, err)
+		log.Fatal().Err(err).Msg("Failed to get bindings from  ")
 
 	}
 	m := make([]map[string]interface{}, 0)
 	err = json.Unmarshal(data, &m)
 	if err != nil {
-		log.Fatalf("this is bad... %v", err)
+		log.Fatal().Err(err).Msg("Failed to unmarshel data ")
 	}
 	if len(m) == 0 {
 		fmt.Println("didn't get any enrichmant")
@@ -129,13 +129,13 @@ func (cng *Change) enrichChange() {
 func (cng *Change) runTableCreate() (string, error) {
 	data, err := wh.GetMasters(cng.Cluster)
 	if err != nil {
-		log.Fatalf("this is sad... %s, %v", data, err)
+		log.Fatal().Err(err).Msgf("this is sad... %s", data)
 
 	}
 	m := make([]map[string]interface{}, 0)
 	err = json.Unmarshal(data, &m)
 	if err != nil {
-		log.Fatalf("this is bad... %v", err)
+		log.Fatal().Err(err).Msg("this is bad... ")
 	}
 	for _, server := range m {
 		serverKey, ok := server["Key"].(map[string]interface{})
@@ -151,33 +151,30 @@ func (cng *Change) runTableCreate() (string, error) {
 		db, err := sql.Open("mysql", DBUrl)
 		defer db.Close()
 		if err != nil {
-			log.Fatal("failed to open DB", err)
+			log.Fatal().Err(err).Msg("failed to open DB")
 		}
 		err = db.Ping()
 		if err != nil {
 			// do something here
-			log.Info("can't connect.\n")
+			log.Info().Str("Action", "create").Msg("can't connect.")
 		}
 
 		result, err := db.Exec("select 1 from dual")
 		if err != nil {
 			// do something here
-
-			log.Infof("%v", err)
-			log.Info("can't select dual")
+			log.Fatal().Err(err).Msg("can't select dual")
 		} else {
-			log.Infof("%v", result)
+			log.Info().Str("Action", "create").Msgf("%v", result)
 		}
 		var msg string
 		sqlcmd := fmt.Sprintf("CREATE TABLE %s%s", cng.TableName, cng.SQLCmd)
 		result, err = db.Exec(sqlcmd)
 		if err != nil {
 			// do something here
-			log.Info("can't create table.\n")
-			log.Infof("%v", err)
+			log.Fatal().Err(err).Msg("can't create table.")
 			msg = err.Error()
 		} else {
-			log.Infof("%v", result)
+			log.Info().Str("Action", "create").Msgf("%v", result)
 			msg = "change done"
 		}
 

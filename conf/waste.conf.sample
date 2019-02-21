@@ -1,9 +1,4 @@
 # empty newlines and lines beginning with a "#" character are ignored.
-# CHEF SETTINGS
-ChefBaseURL https://chef.server.com
-ChefUser me
-ChefKey /my/personal/.chef/pem_file
-
 
 # Orchestrator settings
 OrcBaseAPI orchasterBase/api

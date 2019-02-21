@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/cohenjo/waste/go/config"
-	helpers "github.com/cohenjo/waste/go/mutators"
+	"github.com/cohenjo/waste/go/http"
 	"github.com/outbrain/golib/log"
 )
 
@@ -23,7 +23,7 @@ func main() {
 	clio.ReadArgs()
 
 	config.Config = clio
-	helpers.StartWebServer()
+	http.Serve()
 
 	// gh-ost \
 	// --max-load=Threads_running=25 \

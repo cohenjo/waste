@@ -1,10 +1,12 @@
 package http
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"strconv"
 
+	"github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +14,7 @@ import (
 var router *gin.Engine
 
 func Serve() {
+
 	router := gin.Default()
 	router.LoadHTMLGlob("resources/templates/*")
 
@@ -43,6 +46,18 @@ func initializeRoutes(router *gin.Engine) {
 		// userRoutes.POST("/register", register)
 	}
 	router.GET("/cluster/view/:cluster_id", getCluster)
+	router.GET("/change", getChange)
+	router.POST("/change", createChangeEndpoint)
+}
+
+func createChangeEndpoint(c *gin.Context) {
+	var change mutators.Change
+	c.ShouldBind(&change)
+	fmt.Printf(" %v\n", change)
+
+	change.RunChange()
+
+	c.JSON(http.StatusOK, gin.H{"change": change})
 }
 
 func needReview(c *gin.Context) {
@@ -101,6 +116,12 @@ func getCluster(c *gin.Context) {
 		// If an invalid article ID is specified in the URL, abort with an error
 		c.AbortWithStatus(http.StatusNotFound)
 	}
+}
+
+func getChange(c *gin.Context) {
+	// Check if the article ID is valid
+	render(c, gin.H{"title": "change"}, "change.html")
+
 }
 
 func showRegistrationPage(c *gin.Context) {
