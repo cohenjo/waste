@@ -23,10 +23,11 @@ type Change struct {
 	SQLCmd       string
 }
 
+// Result is the output of DB calls - do we need this??
 type Result string
 
 // ReadFromURL drills the content url to get the actual file content
-func (this *Change) ReadFromURL(fileURL string, httpClient *http.Client) {
+func (c *Change) ReadFromURL(fileURL string, httpClient *http.Client) {
 
 	resp, err := httpClient.Get(fileURL)
 	if err != nil {
@@ -45,14 +46,12 @@ func (this *Change) ReadFromURL(fileURL string, httpClient *http.Client) {
 
 	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(body, &this)
+	err = json.Unmarshal(body, &c)
 	if err != nil {
 		// log.Fatal(err)
 	}
 
 }
-
-var AppVersion string
 
 // // acceptSignals registers for OS signals
 // func acceptSignals(migrationContext *base.MigrationContext) {
@@ -185,11 +184,9 @@ func (cng *Change) runTableCreate() (string, error) {
 	return "aa", nil
 }
 
-/**
-* RunTableRename renames a table to keep it
-* @todo: choose and implement cleanup policy
-* @body: something will eventually need to remove these tables.
- */
+// RunTableRename renames a table to keep it
+// @todo: choose and implement cleanup policy
+// @body: something will eventually need to remove these tables.
 func RunTableRename() (string, error) {
 	return "bbb", nil
 

@@ -13,6 +13,7 @@ import (
 
 var router *gin.Engine
 
+// Serve is the main entry point to start serving the web api.
 func Serve() {
 
 	router := gin.Default()

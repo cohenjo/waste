@@ -29,8 +29,10 @@ type CLIOptions struct {
 	KVStorePassword   string
 }
 
+// Config is the global configuration variable
 var Config CLIOptions
 
+// ReadArgs parses CLI arguments into global configuration
 func (clio *CLIOptions) ReadArgs() {
 	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
 	flag.StringVar(&clio.AlterStatement, "artifact", "", "full artifact (mandatory)")

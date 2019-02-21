@@ -14,7 +14,6 @@ import (
 func TestEnrich(t *testing.T) {
 
 	config.Config.WebAddress = "localhost:4000"
-	wh.SetupHttpClient()
 
 	cng := &Change{Artifact: "com.org.jony-test"}
 	cng.enrichChange()
@@ -28,7 +27,6 @@ func TestCreateTable(t *testing.T) {
 	config.Config.DBUser = "<user>"
 	config.Config.DBPasswd = "<password>"
 	config.Config.WebAddress = "localhost:4000"
-	wh.SetupHttpClient()
 
 	cng := &Change{Artifact: "com.org.jony-test", ChangeType: "create", TableName: "jonyTest", SQLCmd: `(i int, v varchar(256))`}
 	cng.RunChange()
@@ -41,7 +39,6 @@ func TestCreateTable(t *testing.T) {
 func TestCreateLocalTable(t *testing.T) {
 
 	config.Config.WebAddress = "localhost:4000"
-	wh.SetupHttpClient()
 
 	cng := &Change{Artifact: "com.org.jony-test-local", ChangeType: "create", TableName: "avitalTest", SQLCmd: `(i int, v varchar(256))`}
 	cng.RunChange()
@@ -54,7 +51,6 @@ func TestCreateLocalTable(t *testing.T) {
 func TestGetMaster(t *testing.T) {
 
 	config.Config.WebAddress = "localhost:4000"
-	wh.SetupHttpClient()
 
 	cng := &Change{Artifact: "com.org.jony-test"}
 	cng.enrichChange()

@@ -14,6 +14,12 @@ import (
 // change id bigint unsigned - the 'primary key is used. The change of type still makes the primary key workable.
 // drop primary key, drop key name_uidx, create primary key(name), create unique key id_uidx(id) - swapping the two keys. gh-ost is still happy because id is still unique in both tables. So is name.
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 
 	log.SetLevel(log.INFO)

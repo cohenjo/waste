@@ -10,9 +10,9 @@ import (
 	"github.com/outbrain/golib/log"
 )
 
-var httpClient *http.Client
+var httpClient = setupHTTPClient()
 
-func SetupHttpClient() error {
+func setupHTTPClient() *http.Client {
 	// httpTimeout := time.Duration(config.ActiveNodeExpireSeconds) * time.Second
 	timeout := 5 * time.Second
 	// dialTimeout := func(network, addr string) (net.Conn, error) {
@@ -24,9 +24,7 @@ func SetupHttpClient() error {
 	// 	ResponseHeaderTimeout: httpTimeout,
 	// }
 	// httpClient = &http.Client{Transport: httpTransport, Timeout: timeout}
-	httpClient = &http.Client{Timeout: timeout}
-
-	return nil
+	return &http.Client{Timeout: timeout}
 }
 
 // http://localhost:4000/api/master/ecom_local_snapshots
