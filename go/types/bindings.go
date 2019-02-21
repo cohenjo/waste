@@ -11,9 +11,9 @@ type User struct {
 }
 
 var userList = []User{
-	User{Username: "user1", Password: "pass1"},
-	User{Username: "user2", Password: "pass2"},
-	User{Username: "user3", Password: "pass3"},
+	{Username: "user1", Password: "pass1"},
+	{Username: "user2", Password: "pass2"},
+	{Username: "user3", Password: "pass3"},
 }
 
 func RegisterNewUser(username, password string) (*User, error) {

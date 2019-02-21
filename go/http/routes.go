@@ -15,8 +15,8 @@ type cluster struct {
 }
 
 var clusterList = []cluster{
-	cluster{ID: 1, Name: "great", Hostname: "greathost", Ipv4: "192.168.1.1", Port: 3306},
-	cluster{ID: 2, Name: "failure", Hostname: "greath2", Ipv4: "192.168.1.2", Port: 3306},
+	{ID: 1, Name: "great", Hostname: "greathost", Ipv4: "192.168.1.1", Port: 3306},
+	{ID: 2, Name: "failure", Hostname: "greath2", Ipv4: "192.168.1.2", Port: 3306},
 }
 
 // Return a list of all the clusters

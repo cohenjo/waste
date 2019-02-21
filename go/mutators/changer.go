@@ -119,12 +119,12 @@ func (cng *Change) enrichChange() {
 }
 
 /**
-*  RunTableCreate simply runs the given create statment - no validation yet.
+*  RunTableCreate simply runs the given create statement - no validation yet.
 * TODO:
 // 1. use some connection class - nicer
 // 2. add validations:
 *   a. table doesn't exist
-*   b. validate DDL statment?
+*   b. validate DDL statement?
 */
 func (cng *Change) runTableCreate() (string, error) {
 	data, err := wh.GetMasters(cng.Cluster)

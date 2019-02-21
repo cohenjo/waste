@@ -1,15 +1,12 @@
 package logic
 
-
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/wix-system/shepherd/pkg/instances"
 	"net/http"
 	"time"
-	"github.com/wix-system/shepherd/pkg/instances"
 )
-
-
 
 func GetCluster(clusterName string) (response []Instance, err error) {
 	url := fmt.Sprintf("%s/mysql_%s", "cluster", clusterName)
