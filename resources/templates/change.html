@@ -19,19 +19,22 @@
 			</div>
 
 			<form action="/change" method="post" class="text-center border border-light p-5">
-				<select id="discoverHostType" class="form-control">
+				<!-- <select id="discoverHostType" class="form-control">
 					<option value="mongo">MongoDB</option>
 					<option value="mysql">MySQL</option>
 					<option value="cassandra">Cassandra</option>
 					<option value="elastic">ElasticSearch</option>
 					<option value="proxysql">ProxySQL</option>
-				</select>
+				</select> -->
                 
                 <!-- artifact -->
-                <input type="text" class="form-control mb-4" id="ArtifactName" placeholder="Enter artifact name">
+                <input type="text" class="form-control mb-4" id="Artifact" placeholder="Enter artifact name">
                 
                 <!-- cluster -->
-                <input type="text" class="form-control mb-4" id="ClusterName"  placeholder="your favorite sheep">
+				<input type="text" class="form-control mb-4" id="Cluster"  placeholder="Cluster name">
+				
+				<!-- cluster -->
+                <input type="text" class="form-control mb-4" id="DatabaseName"  placeholder="database name">
 
                 <!-- table -->
                 <input type="text" class="form-control mb-4" id="TableName"  placeholder="name your tbale">

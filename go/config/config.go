@@ -82,4 +82,7 @@ func (clio *CLIOptions) ReadArgs() {
 		// Override!!
 		log.SetLevel(log.ERROR)
 	}
+	Config.DBUser = "dbschema"
+	Config.DBPasswd = "Becau5e1Can!"
+	Config.WebAddress = "localhost:4000"
 }

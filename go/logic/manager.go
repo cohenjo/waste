@@ -1,49 +1,18 @@
 package logic
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/wix-system/shepherd/pkg/instances"
-	"net/http"
-	"time"
+	"github.com/cohenjo/waste/go/mutators"
 )
 
-func GetCluster(clusterName string) (response []Instance, err error) {
-	url := fmt.Sprintf("%s/mysql_%s", "cluster", clusterName)
-	log.Debugf("http_client: calling url: %s", url)
-	err = GetFromShepherd(url, &response)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
+func mangeChange(change mutators.Change) error {
 
-}
+	// @todo: do we accept change sets? or 1 by 1?
 
-func GetFromShepherd(endpoint string, dest interface{}) error {
-	url := fmt.Sprintf("http://%s/api/%s", config.Config.OrchestratorAddr, endpoint)
-	log.Debugf("http_client: calling url: %s", url)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
-	}
-	// switch strings.ToLower(config.Config.AuthenticationMethod) {
-	// case "basic", "multi":
-	// 	req.SetBasicAuth(config.Config.HTTPAuthUser, config.Config.HTTPAuthPassword)
-	// }
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
+	// @todo: validate change
 
-	err = json.NewDecoder(res.Body).Decode(dest)
-	if err != nil {
-		return err
-	}
+	// @todo: audit change
 
-	if res.StatusCode != http.StatusOK {
-		return log.Errorf("HttpGetLeader: got %d status on %s", res.StatusCode, url)
-	}
+	// @todo: schedule change <== should we here or externally?
 
 	return nil
 }

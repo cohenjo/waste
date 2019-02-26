@@ -14,6 +14,7 @@ import (
 )
 
 // Change represents a transformation waiting to happen
+// swagger:model Change
 type Change struct {
 	Artifact     string
 	Cluster      string
@@ -150,38 +151,33 @@ func (cng *Change) runTableCreate() (string, error) {
 		db, err := sql.Open("mysql", DBUrl)
 		defer db.Close()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to open DB")
+			log.Error().Err(err).Msg("failed to open DB")
+			continue
 		}
 		err = db.Ping()
 		if err != nil {
 			// do something here
 			log.Info().Str("Action", "create").Msg("can't connect.")
+			continue
 		}
 
-		result, err := db.Exec("select 1 from dual")
-		if err != nil {
-			// do something here
-			log.Fatal().Err(err).Msg("can't select dual")
-		} else {
-			log.Info().Str("Action", "create").Msgf("%v", result)
-		}
 		var msg string
 		sqlcmd := fmt.Sprintf("CREATE TABLE %s%s", cng.TableName, cng.SQLCmd)
-		result, err = db.Exec(sqlcmd)
+		result, err := db.Exec(sqlcmd)
 		if err != nil {
 			// do something here
-			log.Fatal().Err(err).Msg("can't create table.")
+			log.Error().Err(err).Msg("can't create table.")
 			msg = err.Error()
 		} else {
 			log.Info().Str("Action", "create").Msgf("%v", result)
 			msg = "change done"
-		}
 
-		return msg, err
+		}
+		log.Info().Str("Action", "create").Msgf("%s", msg)
 
 	}
 
-	return "aa", nil
+	return "msg", err
 }
 
 // RunTableRename renames a table to keep it

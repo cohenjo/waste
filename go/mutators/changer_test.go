@@ -24,11 +24,15 @@ func TestEnrich(t *testing.T) {
 }
 
 func TestCreateTable(t *testing.T) {
-	config.Config.DBUser = "<user>"
-	config.Config.DBPasswd = "<password>"
+	config.Config.DBUser = "dbschema"
+	config.Config.DBPasswd = "password"
 	config.Config.WebAddress = "localhost:4000"
 
-	cng := &Change{Artifact: "com.org.jony-test", ChangeType: "create", TableName: "jonyTest", SQLCmd: `(i int, v varchar(256))`}
+	cng := &Change{Artifact: "com.wixpress.greyhound-es-testapp", DatabaseName: "greyhound_db", ChangeType: "create", TableName: "users_full_view", SQLCmd: `(
+		kafka_key VARCHAR(200) NOT NULL,
+		value VARCHAR(10000) NOT NULL,
+		PRIMARY KEY(kafka_key)
+		)`}
 	cng.RunChange()
 
 	t.Logf("###############################################################################################")

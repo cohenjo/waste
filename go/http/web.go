@@ -13,6 +13,21 @@ import (
 
 var router *gin.Engine
 
+// @title WASTE Swagger docs
+// @version 1.0
+// @description This is waste server
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name cohenjo
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host waste.cohenjo.io
+// @BasePath /v1
+
 // Serve is the main entry point to start serving the web api.
 func Serve() {
 
@@ -20,7 +35,7 @@ func Serve() {
 	router.LoadHTMLGlob("resources/templates/*")
 
 	initializeRoutes(router)
-	router.GET("/", showIndexPage)
+	// router.GET("/", showIndexPage)
 
 	router.Run()
 }
@@ -37,87 +52,103 @@ func initializeRoutes(router *gin.Engine) {
 		userRoutes.GET("/register", showRegistrationPage)
 		userRoutes.POST("/register", register)
 	}
-	queueRoutes := router.Group("/queue")
-	{
-		queueRoutes.GET("/needreview", needReview)
-		queueRoutes.GET("/reviewed", reviewed)
-		// userRoutes.POST("/login", performLogin)
-		queueRoutes.GET("/scheduled", scheduled)
-		queueRoutes.GET("/completed", completed)
-		// userRoutes.POST("/register", register)
-	}
-	router.GET("/cluster/view/:cluster_id", getCluster)
+	// queueRoutes := router.Group("/queue")
+	// {
+	// 	queueRoutes.GET("/needreview", needReview)
+	// 	queueRoutes.GET("/reviewed", reviewed)
+	// 	// userRoutes.POST("/login", performLogin)
+	// 	queueRoutes.GET("/scheduled", scheduled)
+	// 	queueRoutes.GET("/completed", completed)
+	// 	// userRoutes.POST("/register", register)
+	// }
+	// router.GET("/v1/cluster/view/:cluster_id", getCluster)
 	router.GET("/change", getChange)
 	router.POST("/change", createChangeEndpoint)
 }
 
+// swagger:route POST /change change
+//
+// Changes a table
+//
+// This will show all available pets by default.
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http, https
+//
+//     Responses:
+//       default: Change
+//       200: Change
 func createChangeEndpoint(c *gin.Context) {
 	var change mutators.Change
 	c.ShouldBind(&change)
-	fmt.Printf(" %v\n", change)
-
-	change.RunChange()
+	fmt.Printf(" %+v\n", change)
+	// change.RunChange()
 
 	c.JSON(http.StatusOK, gin.H{"change": change})
 }
 
-func needReview(c *gin.Context) {
-	var clusters []cluster
-	clusters = getAllClusters()
-	render(c, gin.H{
-		"title":   "Need Review",
-		"payload": clusters}, "index.html")
-}
-func reviewed(c *gin.Context) {
-	var clusters []cluster
-	clusters = getAllClusters()
-	render(c, gin.H{
-		"title":   "Reviewed",
-		"payload": clusters}, "index.html")
-}
-func scheduled(c *gin.Context) {
-	var clusters []cluster
-	clusters = getAllClusters()
-	render(c, gin.H{
-		"title":   "scheduled",
-		"payload": clusters}, "index.html")
-}
-func completed(c *gin.Context) {
-	var clusters []cluster
-	clusters = getAllClusters()
-	render(c, gin.H{
-		"title":   "completed",
-		"payload": clusters}, "index.html")
-}
+// func needReview(c *gin.Context) {
+// 	var clusters []cluster
+// 	clusters = getAllClusters()
+// 	render(c, gin.H{
+// 		"title":   "Need Review",
+// 		"payload": clusters}, "index.html")
+// }
+// func reviewed(c *gin.Context) {
+// 	var clusters []cluster
+// 	clusters = getAllClusters()
+// 	render(c, gin.H{
+// 		"title":   "Reviewed",
+// 		"payload": clusters}, "index.html")
+// }
+// func scheduled(c *gin.Context) {
+// 	var clusters []cluster
+// 	clusters = getAllClusters()
+// 	render(c, gin.H{
+// 		"title":   "scheduled",
+// 		"payload": clusters}, "index.html")
+// }
+// func completed(c *gin.Context) {
+// 	var clusters []cluster
+// 	clusters = getAllClusters()
+// 	render(c, gin.H{
+// 		"title":   "completed",
+// 		"payload": clusters}, "index.html")
+// }
 
-func showIndexPage(c *gin.Context) {
-	var clusters []cluster
-	clusters = getAllClusters()
-	render(c, gin.H{
-		"title":   "Home Page",
-		"payload": clusters}, "index.html")
-}
+// func showIndexPage(c *gin.Context) {
+// 	var clusters []cluster
+// 	clusters = getAllClusters()
+// 	render(c, gin.H{
+// 		"title":   "Home Page",
+// 		"payload": clusters}, "index.html")
+// }
 
-func getCluster(c *gin.Context) {
-	// Check if the article ID is valid
-	if articleID, err := strconv.Atoi(c.Param("cluster_id")); err == nil {
-		// Check if the article exists
-		if cluster, err := getClusterByID(articleID); err == nil {
-			// Call the HTML method of the Context to render a template
-			render(c, gin.H{
-				"title":   cluster.Name,
-				"payload": cluster}, "cluster.html")
+// func getCluster(c *gin.Context) {
+// 	// Check if the article ID is valid
+// 	if articleID, err := strconv.Atoi(c.Param("cluster_id")); err == nil {
+// 		// Check if the article exists
+// 		if cluster, err := getClusterByID(articleID); err == nil {
+// 			// Call the HTML method of the Context to render a template
+// 			render(c, gin.H{
+// 				"title":   cluster.Name,
+// 				"payload": cluster}, "cluster.html")
 
-		} else {
-			// If the article is not found, abort with an error
-			c.AbortWithError(http.StatusNotFound, err)
-		}
+// 		} else {
+// 			// If the article is not found, abort with an error
+// 			c.AbortWithError(http.StatusNotFound, err)
+// 		}
 
-	} else {
-		// If an invalid article ID is specified in the URL, abort with an error
-		c.AbortWithStatus(http.StatusNotFound)
-	}
-}
+// 	} else {
+// 		// If an invalid article ID is specified in the URL, abort with an error
+// 		c.AbortWithStatus(http.StatusNotFound)
+// 	}
+// }
 
 func getChange(c *gin.Context) {
 	// Check if the article ID is valid
