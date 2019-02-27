@@ -1,6 +1,7 @@
 
 # configuration file with password
 conf/*.conf
+conf/*.conf.json
 
 vendor/
 # dotenv

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/gin-gonic/gin"
@@ -36,6 +37,9 @@ func Serve() {
 
 	initializeRoutes(router)
 	// router.GET("/", showIndexPage)
+	if !config.Config.Debug { // change this when rolling to prod
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	router.Run()
 }

@@ -35,8 +35,8 @@ func GetArtifactServerDuo(serverChannel chan<- *Server, clusterID string) {
 	client := &http.Client{Transport: tr}
 
 	var orcBaseApi string = "config.Config.OrcBaseAPI"
-	var username string = config.Config.OrcUsername
-	var passwd string = config.Config.OrcPasswd
+	var username string = ""
+	var passwd string = "config.Config.OrcPasswd"
 
 	fmt.Printf("Cluster ID: %s \n", clusterID)
 	url_template := "http://%s/master/mysql_%s"

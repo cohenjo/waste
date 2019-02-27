@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cohenjo/waste/go/config"
 	wh "github.com/cohenjo/waste/go/utils"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/outbrain/golib/log"
 )
 
 func TestEnrich(t *testing.T) {
-
-	config.Config.WebAddress = "localhost:4000"
 
 	cng := &Change{Artifact: "com.org.jony-test"}
 	cng.enrichChange()
@@ -24,9 +21,6 @@ func TestEnrich(t *testing.T) {
 }
 
 func TestCreateTable(t *testing.T) {
-	config.Config.DBUser = "dbschema"
-	config.Config.DBPasswd = "password"
-	config.Config.WebAddress = "localhost:4000"
 
 	cng := &Change{Artifact: "com.wixpress.greyhound-es-testapp", DatabaseName: "greyhound_db", ChangeType: "create", TableName: "users_full_view", SQLCmd: `(
 		kafka_key VARCHAR(200) NOT NULL,
@@ -42,8 +36,6 @@ func TestCreateTable(t *testing.T) {
 
 func TestCreateLocalTable(t *testing.T) {
 
-	config.Config.WebAddress = "localhost:4000"
-
 	cng := &Change{Artifact: "com.org.jony-test-local", ChangeType: "create", TableName: "avitalTest", SQLCmd: `(i int, v varchar(256))`}
 	cng.RunChange()
 
@@ -53,8 +45,6 @@ func TestCreateLocalTable(t *testing.T) {
 }
 
 func TestGetMaster(t *testing.T) {
-
-	config.Config.WebAddress = "localhost:4000"
 
 	cng := &Change{Artifact: "com.org.jony-test"}
 	cng.enrichChange()
