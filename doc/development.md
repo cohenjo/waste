@@ -2,8 +2,11 @@
 # Development
 
 ## Pre-reqs
-We need a local redis to keep the artifact to cluster binding - just because I hate chef.  
-`docker run -n some-redis -P redis`
+gh-ost interduced a change:
+../pkg/mod/github.com/github/gh-ost@v1.0.48/go/base/context.go:718:2: undefined: gcfg.RelaxedParserMode
+../pkg/mod/github.com/github/gh-ost@v1.0.48/go/base/context.go:719:2: undefined: scanner.RelaxedScannerMode
+
+we need to drop that as we don't have that internal change... - we don't use config file anyway...
 
 ### Permissions on the DB
 for dev as we reach from a different network please create a user, e.g.:
@@ -22,3 +25,6 @@ the local can be cleared via:
 or explicitly using:
 `git branch -d the_local_branch`
 
+check if this is useful:
+https://github.com/GuiaBolso/darwin
+https://github.com/gobuffalo/pop

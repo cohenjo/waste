@@ -23,6 +23,8 @@ github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74 h1:FaI7wNyesdMBSkI
 github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74/go.mod h1:VJ0WA2NBN22VlZ2dKZQPAPnyWw5XTlK1KymzLKsr59s=
 github.com/gin-gonic/gin v1.3.0 h1:kCmZyPklC0gVdL728E6Aj20uYBJV93nj/TkwBTKhFbs=
 github.com/gin-gonic/gin v1.3.0/go.mod h1:7cKuhb5qV2ggCFctp2fJQ+ErvciLZrIeoOSOm6mUr7Y=
+github.com/github/gh-ost v1.0.48 h1:aQILzqtjvORRn8Xx2QTxUmgpe5cpGgGVKGRtO9Y0LZE=
+github.com/github/gh-ost v1.0.48/go.mod h1:owPdMQZK1iBTNWZTzlWt2ddOsL3JIbFAJujEgUyK0ag=
 github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411 h1:v52PJ8BcEbDlPQNmu4nEJnfl0ce0l+/AIzsDPPVpUlo=
 github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411/go.mod h1:9UBkcNJTWjbPR4rITaG/7jUPSjv4K6r+T92/X9ATrZs=
 github.com/go-openapi/jsonpointer v0.17.0 h1:nH6xp8XdXHx8dqveo0ZuJBluCO2qGrPbDNZ0dwoRHP0=

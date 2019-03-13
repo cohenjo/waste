@@ -7,6 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74
 	github.com/gin-gonic/gin v1.3.0
+	github.com/github/gh-ost v1.0.48
 	github.com/go-chef/chef v0.0.0-20180320225528-cfd55cf96411
 	github.com/go-openapi/jsonpointer v0.18.0 // indirect
 	github.com/go-openapi/swag v0.18.0 // indirect

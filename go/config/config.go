@@ -10,6 +10,7 @@ import (
 //Configuration defines the base configuration that can be passed to the WASTE system
 type Configuration struct {
 	Debug       bool
+	Execute     bool
 	DBUser      string
 	DBPasswd    string
 	GithubToken string
@@ -25,6 +26,7 @@ var Config = loadConfiguration()
 func loadConfiguration() *Configuration {
 
 	viper.SetDefault("Debug", true)
+	viper.SetDefault("Execute", false)
 	viper.SetDefault("WebAddress", "localhost:4000")
 
 	viper.SetConfigName("waste.conf")   // name of config file (without extension)

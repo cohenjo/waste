@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	// _ "github.com/go-sql-driver/mysql"
 	"github.com/cohenjo/waste/go/config"
 	wh "github.com/cohenjo/waste/go/utils"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/rs/zerolog/log"
 )
 
@@ -84,9 +84,9 @@ func (cng *Change) RunChange() (string, error) {
 	case "create":
 		log.Info().Str("Action", "create").Msg("create new table - will be processed by CREATOR")
 		res, err = cng.runTableCreate()
-	// case "alter":
-	// 	fmt.Println("alter existing table - will be processed by GH-OST")
-	// 	res, err = RunGHOstChange(Config.DBUser, Config.DBPasswd, masterHost.HostName, masterHost.Port, cng.DatabaseName, cng.TableName, cng.SQLCmd)
+	case "alter":
+		log.Info().Str("Action", "alter").Msg("alter table - will be processed by GH-OST")
+		res, err = cng.runTableAlter()
 	case "drop":
 		log.Info().Str("Action", "drop").Msg("drop a table - You're likely an idiot - i'll keep it for now")
 		res, err = cng.runTableRename()
@@ -146,7 +146,7 @@ func (cng *Change) runTableCreate() (string, error) {
 		hostname := serverKey["Hostname"]
 		port := int(serverKey["Port"].(float64))
 		fmt.Printf("creating table on: (%s:%d) great \n", hostname, port)
-		fmt.Printf("running SQL> CREATE TABLE %s%s \n", cng.TableName, cng.SQLCmd)
+		fmt.Printf("running SQL> CREATE TABLE %s(%s) \n", cng.TableName, cng.SQLCmd)
 
 		DBUrl := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?interpolateParams=true&autocommit=true&charset=utf8mb4,utf8,latin1", config.Config.DBUser, config.Config.DBPasswd, hostname, port, cng.DatabaseName)
 		db, err := sql.Open("mysql", DBUrl)
@@ -163,22 +163,28 @@ func (cng *Change) runTableCreate() (string, error) {
 		}
 
 		var msg string
-		sqlcmd := fmt.Sprintf("CREATE TABLE %s%s", cng.TableName, cng.SQLCmd)
-		result, err := db.Exec(sqlcmd)
-		if err != nil {
-			// do something here
-			log.Error().Err(err).Msg("can't create table.")
-			msg = err.Error()
+		sqlcmd := fmt.Sprintf("CREATE TABLE %s(%s)", cng.TableName, cng.SQLCmd)
+		if config.Config.Execute {
+			result, err := db.Exec(sqlcmd)
+			if err != nil {
+				// do something here
+				log.Error().Err(err).Msg("can't create table.")
+				msg = err.Error()
+			} else {
+				log.Info().Str("Action", "create").Msgf("%v", result)
+				msg = "change done"
+
+			}
 		} else {
-			log.Info().Str("Action", "create").Msgf("%v", result)
-			msg = "change done"
-
+			msg = "Execute flag not set"
+			err = nil
 		}
-		log.Info().Str("Action", "create").Msgf("%s", msg)
 
+		log.Info().Str("Action", "create").Msgf("%s", msg)
+		return msg, err
 	}
 
-	return "msg", err
+	return "No Maters", err
 }
 
 // RunTableRename renames a table to keep it
@@ -221,94 +227,24 @@ func (cng *Change) runTableRename() (string, error) {
 		var msg string
 		year, mo, day := time.Now().Date()
 		sqlcmd := fmt.Sprintf("ALTER TABLE %s RENAME TO __waste_%d_%d_%d_%s;", cng.TableName, year, mo, day, cng.TableName)
-		result, err := db.Exec(sqlcmd)
-		if err != nil {
-			// do something here
-			log.Error().Err(err).Msg("can't rename table.")
-			msg = err.Error()
-		} else {
-			log.Info().Str("Action", "drop").Msgf("%v", result)
-			msg = "change done"
+		if config.Config.Execute {
+			result, err := db.Exec(sqlcmd)
+			if err != nil {
+				log.Error().Err(err).Msg("can't rename table.")
+				msg = err.Error()
+			} else {
+				log.Info().Str("Action", "drop").Msgf("%v", result)
+				msg = "change done"
 
+			}
+		} else {
+			msg = "Execute flag not set"
+			err = nil
 		}
 		log.Info().Str("Action", "drop").Msgf("%s", msg)
+		return msg, err
 
 	}
 	return "msg", err
 
 }
-
-// GetArtifactServerDuo return a master/replica duo used to later change schema in with gh-ost
-// func RunGHOstChange(user string, passwd string, dbhost string, port int, dbname string, tablename string, altercmd string) (string, error) {
-
-// 	migrationContext := base.GetMigrationContext()
-
-// 	migrationContext.CliUser = user
-// 	migrationContext.CliPassword = passwd
-// 	migrationContext.InspectorConnectionConfig.Key.Hostname = dbhost
-// 	migrationContext.AssumeMasterHostname = dbhost
-// 	migrationContext.InspectorConnectionConfig.Key.Port = port
-// 	migrationContext.DatabaseName = dbname
-// 	migrationContext.OriginalTableName = tablename
-// 	migrationContext.CountTableRows = false
-// 	migrationContext.NullableUniqueKeyAllowed = false
-// 	migrationContext.ApproveRenamedColumns = false
-// 	migrationContext.SkipRenamedColumns = false
-// 	migrationContext.IsTungsten = false
-// 	migrationContext.DiscardForeignKeys = false
-// 	migrationContext.SkipForeignKeyChecks = false
-// 	migrationContext.TestOnReplica = false
-// 	migrationContext.MigrateOnReplica = false
-// 	migrationContext.OkToDropTable = false
-// 	migrationContext.InitiallyDropOldTable = true
-// 	migrationContext.InitiallyDropGhostTable = true
-// 	migrationContext.DropServeSocket = true
-// 	migrationContext.TimestampOldTable = false
-// 	migrationContext.AssumeRBR = true
-// 	migrationContext.SwitchToRowBinlogFormat = false
-// 	migrationContext.AlterStatement = altercmd
-// 	migrationContext.AllowedRunningOnMaster = true
-// 	migrationContext.AllowedMasterMaster = true
-// 	migrationContext.ReplicaServerId = 99999
-// 	migrationContext.ServeTCPPort = 0
-// 	migrationContext.ServeSocketFile = ""
-
-// 	niceRatio := float64(0)
-// 	chunkSize := int64(1000)
-// 	dmlBatchSize := int64(100)
-// 	executeFlag := true
-// 	maxLagMillis := int64(1500)
-// 	cutOverLockTimeoutSeconds := int64(3)
-// 	migrationContext.CutOverType = base.CutOverAtomic
-
-// 	migrationContext.CriticalLoadIntervalMilliseconds = int64(0)
-// 	migrationContext.CriticalLoadHibernateSeconds = int64(0)
-// 	migrationContext.SetHeartbeatIntervalMilliseconds(100)
-// 	migrationContext.SetNiceRatio(niceRatio)
-// 	migrationContext.SetChunkSize(chunkSize)
-// 	migrationContext.SetDMLBatchSize(dmlBatchSize)
-// 	migrationContext.SetMaxLagMillisecondsThrottleThreshold(maxLagMillis)
-// 	migrationContext.SetThrottleQuery("")
-// 	migrationContext.SetThrottleHTTP("")
-// 	migrationContext.SetDefaultNumRetries(60)
-// 	migrationContext.ApplyCredentials()
-// 	if err := migrationContext.SetCutOverLockTimeoutSeconds(cutOverLockTimeoutSeconds); err != nil {
-// 		log.Errore(err)
-// 	}
-
-// 	if migrationContext.ServeSocketFile == "" {
-// 		migrationContext.ServeSocketFile = fmt.Sprintf("/tmp/gh-ost.%s.%s.sock", migrationContext.DatabaseName, migrationContext.OriginalTableName)
-// 	}
-
-// 	migrationContext.Noop = !(executeFlag)
-// 	log.Infof("starting gh-ost %+v", AppVersion)
-// 	// acceptSignals(migrationContext)
-
-// 	migrator := logic.NewMigrator()
-// 	err := migrator.Migrate()
-// 	if err != nil {
-// 		migrator.ExecOnFailureHook()
-// 		log.Fatale(err)
-// 	}
-// 	return "Done", err
-// }
