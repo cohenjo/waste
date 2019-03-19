@@ -3,6 +3,7 @@ module github.com/cohenjo/waste
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
+	github.com/coreos/go-semver v0.2.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74
@@ -19,6 +20,9 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.0
 	github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90
 	github.com/hashicorp/serf v0.8.1
+	github.com/jinzhu/gorm v1.9.2
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.5
 	github.com/juju/errors v0.0.0-20181012004132-a4583d0a56ea
 	github.com/mattn/go-isatty v0.0.4
@@ -29,6 +33,7 @@ require (
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
 	github.com/namsral/flag v1.7.4-pre
 	github.com/outbrain/golib v0.0.0-20180830062331-ab954725f502
+	github.com/pkg/errors v0.8.1
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/rakanalh/scheduler v0.0.0-20171113200734-3af1a0b9d9fa
 	github.com/rs/zerolog v1.11.0

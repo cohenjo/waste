@@ -20,10 +20,10 @@ type Configuration struct {
 }
 
 // Config is the global configuration variable
-var Config = loadConfiguration()
+var Config *Configuration
 
-// loadConfiguration loads configuration using viper
-func loadConfiguration() *Configuration {
+// LoadConfiguration loads configuration using viper
+func LoadConfiguration() *Configuration {
 
 	viper.SetDefault("Debug", true)
 	viper.SetDefault("Execute", false)
@@ -39,9 +39,7 @@ func loadConfiguration() *Configuration {
 	}
 
 	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		log.Info().Msgf("Config file changed: %v", e.Name)
-	})
+	viper.OnConfigChange(reloadConfig)
 	var cfg Configuration
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
@@ -56,4 +54,14 @@ func loadConfiguration() *Configuration {
 	}
 
 	return &cfg
+}
+
+func reloadConfig(e fsnotify.Event) {
+	log.Info().Msgf("Config file changed: %v", e.Name)
+	var cfg Configuration
+	err := viper.Unmarshal(&cfg)
+	if err != nil {
+		log.Error().Err(err).Msg("unable to decode into struct")
+	}
+	Config = &cfg
 }

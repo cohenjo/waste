@@ -37,30 +37,24 @@ func (cng *Change) runTableAlter() (string, error) {
 		migrationContext := cng.generateContext()
 
 		migrationContext.InspectorConnectionConfig.Key.Hostname = hostname
-		migrationContext.AssumeMasterHostname = hostname
 		migrationContext.InspectorConnectionConfig.Key.Port = port
+		migrationContext.AssumeMasterHostname = hostname
 		migrationContext.DatabaseName = cng.DatabaseName
 		migrationContext.OriginalTableName = cng.TableName
 		migrationContext.AlterStatement = cng.SQLCmd
 
-		migrationContext.ServeSocketFile = fmt.Sprintf("/tmp/gh-ost.%s.%s.sock", migrationContext.DatabaseName, migrationContext.OriginalTableName)
-
 		migrator := logic.NewMigrator(migrationContext)
-		if config.Config.Execute {
-			err := migrator.Migrate()
-			if err != nil {
-				migrator.ExecOnFailureHook()
-				log.Error().Err(err).Msgf("can't alter table table. %d-%d-%d", year, mo, day)
-				msg = err.Error()
-			} else {
-				log.Info().Str("Action", "alter").Msg("done")
-				msg = "change done"
 
-			}
+		err := migrator.Migrate()
+		if err != nil {
+			migrator.ExecOnFailureHook()
+			log.Error().Err(err).Msgf("can't alter table table. %d-%d-%d", year, mo, day)
+			msg = err.Error()
 		} else {
-			msg = "execute flag no set"
-			err = nil
+			log.Info().Str("Action", "alter").Msg("done")
+			msg = "change done"
 		}
+
 		log.Info().Str("Action", "alter").Msgf("%s", msg)
 		return msg, err
 
@@ -98,12 +92,11 @@ func (cng *Change) generateContext() *base.MigrationContext {
 	migrationContext.AllowedMasterMaster = true
 	migrationContext.ReplicaServerId = 99999
 	migrationContext.ServeTCPPort = 0
-	migrationContext.ServeSocketFile = ""
-
+	migrationContext.ServeSocketFile = fmt.Sprintf("/tmp/waste-%s-%s-%s.sock", cng.Cluster, cng.DatabaseName, cng.TableName)
+	migrationContext.PostponeCutOverFlagFile = fmt.Sprintf("/tmp/waste-postpone-%s-%s-%s.flag", cng.Cluster, cng.DatabaseName, cng.TableName)
 	niceRatio := float64(0.7)
 	chunkSize := int64(1000)
 	dmlBatchSize := int64(100)
-	executeFlag := true
 	maxLagMillis := int64(1500)
 	cutOverLockTimeoutSeconds := int64(3)
 	migrationContext.CutOverType = base.CutOverAtomic
@@ -123,7 +116,7 @@ func (cng *Change) generateContext() *base.MigrationContext {
 		log.Error().Err(err)
 	}
 
-	migrationContext.Noop = !(executeFlag)
+	migrationContext.Noop = !(config.Config.Execute)
 	// acceptSignals(migrationContext)
 
 	return migrationContext

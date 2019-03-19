@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/http"
+	"github.com/cohenjo/waste/go/logic"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,6 +26,8 @@ var (
 func main() {
 
 	log.Info().Msgf("Hello, world.\n")
+	config.Config = config.LoadConfiguration()
+	logic.CM = logic.SetupChangeManager()
 	http.Serve()
 	log.Info().Msgf("# Done")
 

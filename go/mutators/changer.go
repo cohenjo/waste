@@ -77,7 +77,7 @@ func (c *Change) ReadFromURL(fileURL string, httpClient *http.Client) {
 
 // RunChange runs the change according to the change type
 func (cng *Change) RunChange() (string, error) {
-	cng.enrichChange()
+
 	var res string
 	var err error
 	switch cng.ChangeType {
@@ -96,8 +96,8 @@ func (cng *Change) RunChange() (string, error) {
 	return res, err
 }
 
-// enrichChange tries to enrich the change with more details...
-func (cng *Change) enrichChange() {
+// EnrichChange tries to enrich the change with more details...
+func (cng *Change) EnrichChange() {
 	data, err := wh.GetBindings(cng.Artifact)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to get bindings from  ")
@@ -130,13 +130,15 @@ func (cng *Change) enrichChange() {
 func (cng *Change) runTableCreate() (string, error) {
 	data, err := wh.GetMasters(cng.Cluster)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("this is sad... %s", data)
+		log.Error().Err(err).Msgf("this is sad... %s", data)
+		return "", err
 
 	}
 	m := make([]map[string]interface{}, 0)
 	err = json.Unmarshal(data, &m)
 	if err != nil {
-		log.Fatal().Err(err).Msg("this is bad... ")
+		log.Error().Err(err).Msg("this is bad... ")
+		return "", err
 	}
 	for _, server := range m {
 		serverKey, ok := server["Key"].(map[string]interface{})
@@ -247,4 +249,9 @@ func (cng *Change) runTableRename() (string, error) {
 	}
 	return "msg", err
 
+}
+
+// Validate functions validates that the change is good to go - improving our success rate.
+func (cng *Change) Validate() bool {
+	return true
 }

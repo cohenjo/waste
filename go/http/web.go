@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/cohenjo/waste/go/config"
+	"github.com/cohenjo/waste/go/logic"
 	"github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
 	"github.com/gin-gonic/gin"
@@ -91,7 +92,8 @@ func createChangeEndpoint(c *gin.Context) {
 	var change mutators.Change
 	c.ShouldBind(&change)
 	fmt.Printf(" %+v\n", change)
-	change.RunChange()
+	// change.RunChange()
+	_ = logic.CM.MangeChange(change)
 
 	c.JSON(http.StatusOK, gin.H{"change": change})
 }

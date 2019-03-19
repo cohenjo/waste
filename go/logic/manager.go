@@ -2,48 +2,84 @@ package logic
 
 import (
 	"github.com/cohenjo/waste/go/mutators"
+	"github.com/coreos/go-semver/semver"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
-type ChangeManager struct {
+type VersionsChangeLog struct {
 	gorm.Model
 	mutators.Change
 	Version string
 }
 
-func setupChangeManager() {
+type ArtifactDBVersion struct {
+	Artifact     string `gorm:"PRIMARY_KEY"`
+	Cluster      string `gorm:"primary_key"`
+	DatabaseName string `gorm:"primary_key"`
+	Version      string
+}
+
+type ChangeManager struct {
+	db *gorm.DB
+}
+
+var CM *ChangeManager
+
+func SetupChangeManager() *ChangeManager {
 	db, err := gorm.Open("sqlite3", "waste.db")
 	if err != nil {
 		panic("failed to connect database")
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	// Migrate the schema
-	db.AutoMigrate(&ChangeManager{})
+	db.AutoMigrate(&VersionsChangeLog{})
+	db.AutoMigrate(&ArtifactDBVersion{})
 
-	// Create
-	db.Create(&ChangeManager{Code: "L1212", Price: 1000})
-
-	// Read
-	var change ChangeManager
-	db.First(&change, 1)                   // find product with id 1
-	db.First(&change, "code = ?", "L1212") // find product with code l1212
-
-	// Update - update product's price to 2000
-	db.Model(&change).Update("Price", 2000)
-
-	// Delete - delete product
-	db.Delete(&change)
+	return &ChangeManager{
+		db: db,
+	}
 }
 
-func mangeChange(change mutators.Change) error {
+// MangeChange - manages the change flow, validation, auditing, and execution.
+func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 
 	// @todo: do we accept change sets? or 1 by 1?
+	change.EnrichChange()
 
 	// @todo: validate change
+	ok := change.Validate()
+	if !ok {
+		log.Error().Msg("Failed to validate change")
+		return errors.New("Failed to validate change")
+	}
 
 	// @todo: audit change
+	cm.storeChange(change)
 
 	// @todo: schedule change <== should we here or externally?
+	status, err := change.RunChange()
+	if err != nil {
+		log.Error().Err(err).Msg("something went wrong ")
+		return err
+	}
+	log.Info().Msgf("finished migration, status: ", status)
 
 	return nil
+}
+
+func (cm *ChangeManager) storeChange(change mutators.Change) {
+
+	var adv ArtifactDBVersion
+	cm.db.Where(ArtifactDBVersion{Artifact: change.Artifact,
+		Cluster:      change.Cluster,
+		DatabaseName: change.DatabaseName}).Attrs("version", "1.0.0").FirstOrCreate(&adv)
+	v := semver.New(adv.Version)
+	v.BumpMinor()
+	adv.Version = v.String()
+	cm.db.Save(&adv)
+	cm.db.Create(&VersionsChangeLog{Version: adv.Version, Change: change})
 }
