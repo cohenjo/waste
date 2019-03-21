@@ -56,7 +56,7 @@ func (cng *Change) runTableAlter() (string, error) {
 		}
 
 		log.Info().Str("Action", "alter").Msgf("%s", msg)
-		return msg, err
+		// return msg, err
 
 	}
 	return "msg", err

@@ -6,6 +6,8 @@ require (
 	github.com/coreos/go-semver v0.2.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fsnotify/fsnotify v1.4.7
+	github.com/gin-contrib/expvar v0.0.0-20190301062728-2692c8a81d03
+	github.com/gin-contrib/logger v0.0.1
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74
 	github.com/gin-gonic/gin v1.3.0
 	github.com/github/gh-ost v1.0.48
@@ -20,6 +22,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.0
 	github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90
 	github.com/hashicorp/serf v0.8.1
+	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jmoiron/sqlx v1.2.0
@@ -30,7 +33,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
-	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/modern-go/reflect2 v1.0.1
 	github.com/namsral/flag v1.7.4-pre
 	github.com/outbrain/golib v0.0.0-20180830062331-ab954725f502
 	github.com/pkg/errors v0.8.1
@@ -55,12 +58,10 @@ require (
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/oauth2 v0.0.0-20181102003913-e0f2c55a7fc7
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20181205085412-a5c9d58dba9a
+	golang.org/x/sys v0.0.0-20181228144115-9a3f9b0469bb
 	golang.org/x/text v0.3.0
 	golang.org/x/tools v0.0.0-20190220190617-97f80cd5504d // indirect
 	google.golang.org/appengine v1.4.0
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/gcfg.v1 v1.2.3
 	gopkg.in/go-playground/validator.v8 v8.18.2
 	gopkg.in/warnings.v0 v0.1.2

@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strconv"
+
+	"github.com/cohenjo/waste/go/scheduler"
 
 	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/logic"
 	"github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 var router *gin.Engine
@@ -30,6 +35,10 @@ var router *gin.Engine
 // @host waste.cohenjo.io
 // @BasePath /v1
 
+var (
+	rxURL = regexp.MustCompile(`^/regexp\d*`)
+)
+
 // Serve is the main entry point to start serving the web api.
 func Serve() {
 
@@ -41,8 +50,16 @@ func Serve() {
 	if !config.Config.Debug { // change this when rolling to prod
 		gin.SetMode(gin.ReleaseMode)
 	}
+	router.Use(logger.SetLogger())
 
-	router.Run()
+	router.Use(logger.SetLogger(logger.Config{
+		Logger:         &log.Logger,
+		UTC:            true,
+		SkipPath:       []string{"/skip"},
+		SkipPathRegexp: rxURL,
+	}))
+
+	router.Run("127.0.0.1:8080")
 }
 
 func initializeRoutes(router *gin.Engine) {
@@ -69,6 +86,8 @@ func initializeRoutes(router *gin.Engine) {
 	// router.GET("/v1/cluster/view/:cluster_id", getCluster)
 	router.GET("/change", getChange)
 	router.POST("/change", createChangeEndpoint)
+
+	router.GET("/tasks", getTasks)
 }
 
 // swagger:route POST /change change
@@ -242,4 +261,11 @@ func render(c *gin.Context, data gin.H, templateName string) {
 		c.HTML(http.StatusOK, templateName, data)
 	}
 
+}
+
+func getTasks(c *gin.Context) {
+	// change.RunChange()
+	tasks, _ := scheduler.WS.GetTasks()
+
+	c.JSON(http.StatusOK, gin.H{"tasks": tasks})
 }

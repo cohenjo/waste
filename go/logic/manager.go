@@ -1,7 +1,12 @@
 package logic
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/mutators"
+	"github.com/cohenjo/waste/go/scheduler"
 	"github.com/coreos/go-semver/semver"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -39,6 +44,9 @@ func SetupChangeManager() *ChangeManager {
 	db.AutoMigrate(&VersionsChangeLog{})
 	db.AutoMigrate(&ArtifactDBVersion{})
 
+	//Register tasks with the scheduler
+	scheduler.WS.RegisterTask("drop", mutators.DropTask)
+
 	return &ChangeManager{
 		db: db,
 	}
@@ -66,7 +74,16 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 		log.Error().Err(err).Msg("something went wrong ")
 		return err
 	}
-	log.Info().Msgf("finished migration, status: ", status)
+	// Cleanup renamed table
+	if change.ChangeType == "drop" {
+		year, mo, day := time.Now().Date()
+		dropThisTable := fmt.Sprintf("__waste_%d_%d_%d_%s;", year, mo, day, change.TableName)
+		log.Info().Msgf("Adding task to drop %s in %d days", dropThisTable, config.Config.GraceDays)
+		dropChange := mutators.DropChange{Cluster: change.Cluster, DatabaseName: change.DatabaseName, TableName: dropThisTable}
+
+		scheduler.WS.AddTask(config.Config.GraceDays, "drop", dropChange)
+	}
+	log.Info().Msgf("finished migration, status: %s", status)
 
 	return nil
 }

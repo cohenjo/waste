@@ -183,7 +183,7 @@ func (cng *Change) runTableCreate() (string, error) {
 		}
 
 		log.Info().Str("Action", "create").Msgf("%s", msg)
-		return msg, err
+		// return msg, err
 	}
 
 	return "No Maters", err
@@ -228,7 +228,7 @@ func (cng *Change) runTableRename() (string, error) {
 
 		var msg string
 		year, mo, day := time.Now().Date()
-		sqlcmd := fmt.Sprintf("ALTER TABLE %s RENAME TO __waste_%d_%d_%d_%s;", cng.TableName, year, mo, day, cng.TableName)
+		sqlcmd := fmt.Sprintf("ALTER TABLE %s.%s RENAME TO %s.__waste_%d_%d_%d_%s;", cng.DatabaseName, cng.TableName, cng.DatabaseName, year, mo, day, cng.TableName)
 		if config.Config.Execute {
 			result, err := db.Exec(sqlcmd)
 			if err != nil {
@@ -244,7 +244,7 @@ func (cng *Change) runTableRename() (string, error) {
 			err = nil
 		}
 		log.Info().Str("Action", "drop").Msgf("%s", msg)
-		return msg, err
+		// return msg, err
 
 	}
 	return "msg", err

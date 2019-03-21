@@ -13,7 +13,7 @@ import (
 func TestEnrich(t *testing.T) {
 
 	cng := &Change{Artifact: "com.org.jony-test"}
-	cng.enrichChange()
+	cng.EnrichChange()
 
 	t.Logf("###############################################################################################")
 	t.Logf("after rich: %+v", cng)
@@ -47,7 +47,7 @@ func TestCreateLocalTable(t *testing.T) {
 func TestGetMaster(t *testing.T) {
 
 	cng := &Change{Artifact: "com.org.jony-test"}
-	cng.enrichChange()
+	cng.EnrichChange()
 
 	data, err := wh.GetMasters(cng.Cluster)
 	if err != nil {

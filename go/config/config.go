@@ -17,6 +17,7 @@ type Configuration struct {
 	GithubOwner string
 	GithubRepo  string
 	WebAddress  string
+	GraceDays   int
 }
 
 // Config is the global configuration variable

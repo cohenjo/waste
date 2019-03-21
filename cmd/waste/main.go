@@ -4,6 +4,7 @@ import (
 	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/http"
 	"github.com/cohenjo/waste/go/logic"
+	"github.com/cohenjo/waste/go/scheduler"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,7 +28,9 @@ func main() {
 
 	log.Info().Msgf("Hello, world.\n")
 	config.Config = config.LoadConfiguration()
+	scheduler.WS = scheduler.SetupScheduler()
 	logic.CM = logic.SetupChangeManager()
+	scheduler.WS.Start()
 	http.Serve()
 	log.Info().Msgf("# Done")
 
