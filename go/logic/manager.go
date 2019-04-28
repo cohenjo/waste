@@ -71,9 +71,10 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 	// @todo: schedule change <== should we here or externally?
 	status, err := change.RunChange()
 	if err != nil {
-		log.Error().Err(err).Msg("something went wrong ")
+		log.Error().Err(err).Msg("something went wrong during change run")
 		return err
 	}
+
 	// Cleanup renamed table
 	if change.ChangeType == "drop" {
 		year, mo, day := time.Now().Date()
@@ -83,6 +84,15 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 
 		scheduler.WS.AddTask(config.Config.GraceDays, "drop", dropChange)
 	}
+	// Cleanup altered table
+	if change.ChangeType == "alter" {
+		dropThisTable := fmt.Sprintf("_gh_ost_%s_del;", change.TableName)
+		log.Info().Msgf("Adding task to drop %s in %d days", dropThisTable, config.Config.GraceDays)
+		dropChange := mutators.DropChange{Cluster: change.Cluster, DatabaseName: change.DatabaseName, TableName: dropThisTable}
+
+		scheduler.WS.AddTask(config.Config.GraceDays, "drop", dropChange)
+	}
+
 	log.Info().Msgf("finished migration, status: %s", status)
 
 	return nil

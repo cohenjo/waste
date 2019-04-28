@@ -28,6 +28,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.5
 	github.com/juju/errors v0.0.0-20181012004132-a4583d0a56ea
+	github.com/knocknote/vitess-sqlparser v0.0.0-20181121014348-1003c43917a3
 	github.com/mattn/go-isatty v0.0.4
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/mitchellh/go-homedir v1.0.0
@@ -55,6 +56,7 @@ require (
 	github.com/swaggo/swag v1.4.1
 	github.com/ugorji/go v1.1.2
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
+	github.com/youtube/vitess v2.1.1+incompatible // indirect
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/oauth2 v0.0.0-20181102003913-e0f2c55a7fc7
@@ -62,8 +64,10 @@ require (
 	golang.org/x/text v0.3.0
 	golang.org/x/tools v0.0.0-20190220190617-97f80cd5504d // indirect
 	google.golang.org/appengine v1.4.0
+	google.golang.org/grpc v1.19.1 // indirect
 	gopkg.in/gcfg.v1 v1.2.3
 	gopkg.in/go-playground/validator.v8 v8.18.2
 	gopkg.in/warnings.v0 v0.1.2
 	gopkg.in/yaml.v2 v2.2.2
+	vitess.io/vitess v2.1.1+incompatible
 )
