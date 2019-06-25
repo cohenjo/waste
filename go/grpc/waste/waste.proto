@@ -31,7 +31,7 @@ message Host {
     int port = 2;
 }
 
-massage GHosts {
+message GHosts {
     Host leader = 1;
     Host source = 2;
     Host lagger = 3;
