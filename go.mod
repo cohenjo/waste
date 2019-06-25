@@ -26,7 +26,7 @@ require (
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/json-iterator/go v1.1.5
+	github.com/json-iterator/go v1.1.6
 	github.com/juju/errors v0.0.0-20181012004132-a4583d0a56ea
 	github.com/knocknote/vitess-sqlparser v0.0.0-20181121014348-1003c43917a3
 	github.com/mattn/go-isatty v0.0.4
@@ -37,6 +37,9 @@ require (
 	github.com/modern-go/reflect2 v1.0.1
 	github.com/namsral/flag v1.7.4-pre
 	github.com/outbrain/golib v0.0.0-20180830062331-ab954725f502
+	github.com/pingcap/parser v0.0.0-20190624133417-59b67d9f7420
+	github.com/pingcap/tidb v0.0.0-20190624171811-a57b6e60a6f7
+	github.com/pingcap/tipb v0.0.0-20190617140251-c0b8f1a8c839 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/rakanalh/scheduler v0.0.0-20171113200734-3af1a0b9d9fa
@@ -49,18 +52,18 @@ require (
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/siddontang/go-log v0.0.0-20180807004314-8d05993dda07
 	github.com/siddontang/go-mysql v0.0.0-20181028041111-76c059e36c62
+	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/objx v0.1.1
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/gin-swagger v1.0.0
 	github.com/swaggo/swag v1.4.1
 	github.com/ugorji/go v1.1.2
-	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
 	github.com/youtube/vitess v2.1.1+incompatible // indirect
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/oauth2 v0.0.0-20181102003913-e0f2c55a7fc7
-	golang.org/x/sys v0.0.0-20181228144115-9a3f9b0469bb
+	golang.org/x/sys v0.0.0-20190422165155-953cdadca894
 	golang.org/x/text v0.3.0
 	golang.org/x/tools v0.0.0-20190220190617-97f80cd5504d // indirect
 	google.golang.org/appengine v1.4.0

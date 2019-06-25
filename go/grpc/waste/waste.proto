@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package waste;
+
+service Waste {
+    rpc Status (EmptyParam) returns (APIResponse); 
+    rpc RunChange (Change) returns (APIResponse);  
+    rpc CheckChange (Change) returns (APIResponse); 
+ }
+
+ enum StatusCode {
+     OK = 0;
+     ERROR = 1;
+ }
+
+ message EmptyParam {}
+
+ message APIResponse{
+    StatusCode code = 1;
+    string message =2;
+ }
+
+
+message Host {
+    string hostname = 1;
+    int port = 2;
+}
+
+message Host {
+    string hostname = 1;
+    int port = 2;
+}
+
+massage GHosts {
+    Host leader = 1;
+    Host source = 2;
+    Host lagger = 3;
+}
+
+message Change {
+    required string artifact = 1;
+    required string cluster = 2;
+	optional string db = 3;
+	optional string table = 4;
+	required string ddl = 5;
+    optional repeated Host leaders = 6;
+    optional repeated GHost groups = 7;
+}
+
+

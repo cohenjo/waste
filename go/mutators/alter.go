@@ -12,7 +12,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (cng *Change) runTableAlter() (string, error) {
+type AlterTable struct {
+	BaseChange
+}
+
+
+
+func (cng *AlterTable) Validate() error {
+	return nil
+}
+
+func (cng *AlterTable) PostSteps() error {
+	return nil
+}
+
+// RunChange - Runs the alter table
+// alter table - will be processed by GH-OST
+func (cng *AlterTable) RunChange() (string, error) {
 	data, err := wh.GetMasters(cng.Cluster)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("this is sad... %s", data)
@@ -64,7 +80,7 @@ func (cng *Change) runTableAlter() (string, error) {
 }
 
 // generateContext return a context used to later change schema in with gh-ost
-func (cng *Change) generateContext() *base.MigrationContext {
+func (cng *AlterTable) generateContext() *base.MigrationContext {
 
 	migrationContext := base.NewMigrationContext()
 	migrationContext.ConfigFile = ""

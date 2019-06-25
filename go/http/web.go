@@ -10,9 +10,10 @@ import (
 	"github.com/cohenjo/waste/go/scheduler"
 
 	"github.com/cohenjo/waste/go/config"
-	"github.com/cohenjo/waste/go/logic"
+	// "github.com/cohenjo/waste/go/logic"
 	"github.com/cohenjo/waste/go/mutators"
 	"github.com/cohenjo/waste/go/types"
+	"github.com/cohenjo/waste/go/utils"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -86,6 +87,7 @@ func initializeRoutes(router *gin.Engine) {
 	// router.GET("/v1/cluster/view/:cluster_id", getCluster)
 	router.GET("/change", getChange)
 	router.POST("/change", createChangeEndpoint)
+	router.GET("/ddl", ddlEndpoint)
 
 	router.GET("/tasks", getTasks)
 }
@@ -108,36 +110,39 @@ func initializeRoutes(router *gin.Engine) {
 //       default: Change
 //       200: Change
 func createChangeEndpoint(c *gin.Context) {
-	var change mutators.Change
-	c.ShouldBind(&change)
+	var change mutators.BaseChange
+	err := c.ShouldBind(&change)
+	if err != nil {
+		fmt.Printf("error: %v",err)
+	}
 	fmt.Printf(" %+v\n", change)
+	stmtNode,err := utils.Parse(change.SQLCmd)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return 	
+	}
+	change.ASTNode = stmtNode
+	change.InferFromAST()
 	// change.RunChange()
-	_ = logic.CM.MangeChange(change)
+	// _ = logic.CM.MangeChange(change)
 
 	c.JSON(http.StatusOK, gin.H{"change": change})
 }
 
-// func needReview(c *gin.Context) {
-// 	var clusters []cluster
-// 	clusters = getAllClusters()
-// 	render(c, gin.H{
-// 		"title":   "Need Review",
-// 		"payload": clusters}, "index.html")
-// }
-// func reviewed(c *gin.Context) {
-// 	var clusters []cluster
-// 	clusters = getAllClusters()
-// 	render(c, gin.H{
-// 		"title":   "Reviewed",
-// 		"payload": clusters}, "index.html")
-// }
-// func scheduled(c *gin.Context) {
-// 	var clusters []cluster
-// 	clusters = getAllClusters()
-// 	render(c, gin.H{
-// 		"title":   "scheduled",
-// 		"payload": clusters}, "index.html")
-// }
+// ddlEndpoint is an endpoint that accepts string of a ddl 
+// http://localhost:8080/ddl?q=alter+table+foo+add+column+bar+varchar(256)
+func ddlEndpoint(c *gin.Context) {
+	query:= c.Query("q")
+	stmtNode,err := utils.Parse(query)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return 	
+	}
+	fmt.Printf("QUERY: %+v\n", stmtNode)
+	c.JSON(http.StatusOK, gin.H{"change": stmtNode})
+}
+
+
 // func completed(c *gin.Context) {
 // 	var clusters []cluster
 // 	clusters = getAllClusters()

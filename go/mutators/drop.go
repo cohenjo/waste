@@ -11,12 +11,21 @@ import (
 )
 
 type DropChange struct {
+	BaseChange
 	Artifact     string
 	Cluster      string
 	DatabaseName string
 	TableName    string
 	ChangeType   string
 	SQLCmd       string
+}
+
+func (cng *DropChange) Validate() error {
+	return nil
+}
+
+func (cng *DropChange) PostSteps() error {
+	return nil
 }
 
 func (cng *DropChange) RunChange() (string, error) {

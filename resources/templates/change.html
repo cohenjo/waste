@@ -18,7 +18,7 @@
 				</p>
 			</div>
 
-			<form action="/change" method="post" class="text-center border border-light p-5">
+			<form action="/change" method="post" class="text-center border border-light p-5" name="ddlForm">
 				<!-- <select id="discoverHostType" class="form-control">
 					<option value="mongo">MongoDB</option>
 					<option value="mysql">MySQL</option>
@@ -28,20 +28,20 @@
 				</select> -->
                 
                 <!-- artifact -->
-                <input type="text" class="form-control mb-4" id="Artifact" placeholder="Enter artifact name">
+                <input type="text" class="form-control mb-4" id="artifact" placeholder="Enter artifact name">
                 
                 <!-- cluster -->
-				<input type="text" class="form-control mb-4" id="Cluster"  placeholder="Cluster name">
+				<input type="text" class="form-control mb-4" id="cluster"  placeholder="Cluster name">
 				
 				<!-- cluster -->
-                <input type="text" class="form-control mb-4" id="DatabaseName"  placeholder="database name">
+                <input type="text" class="form-control mb-4" id="db_name"  placeholder="database name">
 
                 <!-- table -->
-                <input type="text" class="form-control mb-4" id="TableName"  placeholder="name your tbale">
+                <input type="text" class="form-control mb-4" id="table_name"  placeholder="name your tbale">
 
                 <!-- Columns -->
                 <div class="form-group">
-                    <textarea class="form-control rounded-0" id="SQLCmd" rows="3" placeholder="columns and stuff"></textarea>
+                    <textarea class="form-control rounded-0" id="ddl" rows="3" placeholder="columns and stuff"></textarea>
                 </div>
 				<button type="submit" class="btn btn-rounded " value="Submit">Submit</button>
 			</form>
