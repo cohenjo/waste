@@ -18,7 +18,8 @@ require (
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/golang/protobuf v1.2.0
 	github.com/google/pprof v0.0.0-20190226225141-b51a6544410d // indirect
-	github.com/hashicorp/consul v1.3.0
+	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
+	github.com/hashicorp/consul v1.4.0
 	github.com/hashicorp/go-cleanhttp v0.5.0
 	github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90
 	github.com/hashicorp/serf v0.8.1
@@ -36,6 +37,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/modern-go/reflect2 v1.0.1
 	github.com/namsral/flag v1.7.4-pre
+	github.com/opentracing/opentracing-go v1.0.2
 	github.com/outbrain/golib v0.0.0-20180830062331-ab954725f502
 	github.com/pingcap/parser v0.0.0-20190624133417-59b67d9f7420
 	github.com/pingcap/tidb v0.0.0-20190624171811-a57b6e60a6f7
@@ -59,6 +61,7 @@ require (
 	github.com/swaggo/gin-swagger v1.0.0
 	github.com/swaggo/swag v1.4.1
 	github.com/ugorji/go v1.1.2
+	github.com/wix-system/shepherd v0.1.2
 	github.com/youtube/vitess v2.1.1+incompatible // indirect
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
@@ -67,7 +70,7 @@ require (
 	golang.org/x/text v0.3.0
 	golang.org/x/tools v0.0.0-20190220190617-97f80cd5504d // indirect
 	google.golang.org/appengine v1.4.0
-	google.golang.org/grpc v1.19.1 // indirect
+	google.golang.org/grpc v1.19.1
 	gopkg.in/gcfg.v1 v1.2.3
 	gopkg.in/go-playground/validator.v8 v8.18.2
 	gopkg.in/warnings.v0 v0.1.2

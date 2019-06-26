@@ -2,10 +2,12 @@ syntax = "proto3";
 
 package waste;
 
+import "google/protobuf/timestamp.proto"
+
 service Waste {
-    rpc Status (EmptyParam) returns (APIResponse); 
+    rpc Status (Filter) returns (APIResponse); 
     rpc RunChange (Change) returns (APIResponse);  
-    rpc CheckChange (Change) returns (APIResponse); 
+    rpc CheckChange (UUID) returns (APIResponse); 
  }
 
  enum StatusCode {
@@ -17,7 +19,19 @@ service Waste {
 
  message APIResponse{
     StatusCode code = 1;
-    string message =2;
+    string message = 2;
+    string uuid = 3;
+    optional repeated CheckStatus status = 4;
+ }
+
+ message UUID {
+     string uuid = 1;
+ }
+
+ message Filter {
+    optional string repeated uuid = 1;
+    optional string repeated artifact = 2;
+    optional string repeated cluster = 3;
  }
 
 message Host {
@@ -41,4 +55,21 @@ message Change {
     optional repeated GHost groups = 7;
 }
 
+enum State {
+    RUNNING = 0;
+    PENDING = 1;
+    SUCCESS = 2;
+    FAILURE = 3;
+    APPROVAL = 4;
+}
 
+message CheckStatus {
+    State change_state = 1;
+    string message =  2;
+    google.protobuf.Timestamp scheduled_at = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    int progress = 6; // 0-100%
+    google.protobuf.Duration eta = 7;
+    Change change = 8; // the change object 
+}
