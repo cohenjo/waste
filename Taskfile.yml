@@ -1,0 +1,46 @@
+# https://taskfile.dev
+
+version: '2'
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  run:
+    desc: Run waste server
+    cmds:
+      - GO111MODULE=on go run cmd/sheep/main.go
+    sources:
+      - pkg/**/*.go
+    method: checksum
+
+    
+  mod:
+    desc: download relevate modules
+    cmds:
+      - GO111MODULE=on go mod download
+
+  package:
+    desc: package a new release
+    cmds:
+      - git tag -am {{.VERSION}} {{.VERSION}}
+      - git push 
+      - goreleaser --rm-dist
+    vars: 
+      VERSION: 
+        sh: git semver --next-patch
+
+  grpc-services:
+    desc: Generate GRPC client/server code form the .proto files
+    dir: go/grpc
+    cmds:
+      - go generate -v ./waste.go
+    sources:
+      - go/grpc/**/*.proto
+    generates:
+      - go/grpc/**/*.pb.go

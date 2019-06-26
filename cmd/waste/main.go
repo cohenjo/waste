@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/http"
+	"github.com/cohenjo/waste/go/grpc"
 	"github.com/cohenjo/waste/go/logic"
 	"github.com/cohenjo/waste/go/scheduler"
 	"github.com/rs/zerolog/log"
@@ -31,6 +32,7 @@ func main() {
 	scheduler.WS = scheduler.SetupScheduler()
 	logic.CM = logic.SetupChangeManager()
 	scheduler.WS.Start()
+	grpc.Serve()
 	http.Serve()
 	log.Info().Msgf("# Done")
 

@@ -18,6 +18,8 @@ type Configuration struct {
 	GithubRepo  string
 	WebAddress  string
 	GraceDays   int
+	GrpcEnable bool
+	GrpcListeningPort int
 }
 
 // Config is the global configuration variable
@@ -29,6 +31,8 @@ func LoadConfiguration() *Configuration {
 	viper.SetDefault("Debug", true)
 	viper.SetDefault("Execute", false)
 	viper.SetDefault("WebAddress", "localhost:4000")
+	viper.SetDefault("GrpcEnable", true)
+	viper.SetDefault("GrpcListeningPort", 3006)
 
 	viper.SetConfigName("waste.conf")   // name of config file (without extension)
 	viper.AddConfigPath("/etc/waste/")  // path to look for the config file in

@@ -2,41 +2,23 @@ syntax = "proto3";
 
 package waste;
 
-import "google/protobuf/timestamp.proto"
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 service Waste {
-    rpc Status (Filter) returns (APIResponse); 
-    rpc RunChange (Change) returns (APIResponse);  
-    rpc CheckChange (UUID) returns (APIResponse); 
+    rpc Status (Filter) returns (stream ChangeStatus); 
+    rpc RunChange (Change) returns (ChangeStatus);  
  }
-
- enum StatusCode {
-     OK = 0;
-     ERROR = 1;
- }
-
- message EmptyParam {}
-
- message APIResponse{
-    StatusCode code = 1;
-    string message = 2;
-    string uuid = 3;
-    optional repeated CheckStatus status = 4;
- }
-
- message UUID {
-     string uuid = 1;
- }
-
+ 
  message Filter {
-    optional string repeated uuid = 1;
-    optional string repeated artifact = 2;
-    optional string repeated cluster = 3;
+    repeated string uuid = 1;
+    repeated string artifact = 2;
+    repeated string cluster = 3;
  }
 
 message Host {
     string hostname = 1;
-    int port = 2;
+    int32 port = 2;
 }
 
 message GHosts {
@@ -46,13 +28,13 @@ message GHosts {
 }
 
 message Change {
-    required string artifact = 1;
-    required string cluster = 2;
-	optional string db = 3;
-	optional string table = 4;
-	required string ddl = 5;
-    optional repeated Host leaders = 6;
-    optional repeated GHost groups = 7;
+    string artifact = 1;
+    string cluster = 2;
+	string db = 3;
+	string table = 4;
+	string ddl = 5;
+    repeated Host leaders = 6;
+    repeated GHosts groups = 7;
 }
 
 enum State {
@@ -63,13 +45,14 @@ enum State {
     APPROVAL = 4;
 }
 
-message CheckStatus {
+message ChangeStatus {
     State change_state = 1;
     string message =  2;
-    google.protobuf.Timestamp scheduled_at = 3;
-    google.protobuf.Timestamp start_time = 4;
-    google.protobuf.Timestamp end_time = 5;
-    int progress = 6; // 0-100%
-    google.protobuf.Duration eta = 7;
-    Change change = 8; // the change object 
+    string uuid = 3;
+    google.protobuf.Timestamp scheduled_at = 4;
+    google.protobuf.Timestamp start_time = 5;
+    google.protobuf.Timestamp end_time = 6;
+    int32 progress = 7; // 0-100%
+    google.protobuf.Duration eta = 8;
+    Change change = 9; // the change object 
 }
