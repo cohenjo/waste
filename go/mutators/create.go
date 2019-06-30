@@ -1,10 +1,8 @@
 package mutators
 
 import (
-	wh "github.com/cohenjo/waste/go/utils"
 	"github.com/rs/zerolog/log"
 	"fmt"
-	"encoding/json"
 	"database/sql"
 	"github.com/cohenjo/waste/go/config"
 )
@@ -27,32 +25,17 @@ func (cng *CreateTable) PostSteps() error {
 // 1. use some connection class - nicer
 // 2. add validations:
 *   a. table doesn't exist
-*   b. validate DDL statement?
 */
 func (cng *CreateTable) RunChange() (string, error) {
-	data, err := wh.GetMasters(cng.Cluster)
-	if err != nil {
-		log.Error().Err(err).Msgf("this is sad... %s", data)
-		return "", err
+	log.Info().Msgf("Running create table on: %v",cng)
+	var err error
+	for _, server := range cng.Leaders {
 
-	}
-	m := make([]map[string]interface{}, 0)
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		log.Error().Err(err).Msg("this is bad... ")
-		return "", err
-	}
-	for _, server := range m {
-		serverKey, ok := server["Key"].(map[string]interface{})
-		if !ok {
-			fmt.Printf("be angry")
-		}
-		hostname := serverKey["Hostname"]
-		port := int(serverKey["Port"].(float64))
-		fmt.Printf("creating table on: (%s:%d) great \n", hostname, port)
-		fmt.Printf("running SQL> CREATE TABLE %s(%s) \n", cng.TableName, cng.SQLCmd)
+		fmt.Printf("creating table on: (%s:%d) great \n", server.Hostname, server.Port)
+		fmt.Printf("running SQL> %s ;\n", cng.SQLCmd)
 
-		DBUrl := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?interpolateParams=true&autocommit=true&charset=utf8mb4,utf8,latin1", config.Config.DBUser, config.Config.DBPasswd, hostname, port, cng.DatabaseName)
+		DBUrl := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?interpolateParams=true&autocommit=true&charset=utf8mb4,utf8,latin1", config.Config.DBUser, config.Config.DBPasswd, server.Hostname, server.Port, cng.DatabaseName)
+		fmt.Printf("DB URL> %s ;\n", DBUrl)
 		db, err := sql.Open("mysql", DBUrl)
 		defer db.Close()
 		if err != nil {
@@ -67,7 +50,7 @@ func (cng *CreateTable) RunChange() (string, error) {
 		}
 
 		var msg string
-		sqlcmd := fmt.Sprintf("CREATE TABLE %s(%s)", cng.TableName, cng.SQLCmd)
+		sqlcmd := cng.SQLCmd
 		if config.Config.Execute {
 			result, err := db.Exec(sqlcmd)
 			if err != nil {
@@ -77,7 +60,6 @@ func (cng *CreateTable) RunChange() (string, error) {
 			} else {
 				log.Info().Str("Action", "create").Msgf("%v", result)
 				msg = "change done"
-
 			}
 		} else {
 			msg = "Execute flag not set"
@@ -89,4 +71,16 @@ func (cng *CreateTable) RunChange() (string, error) {
 	}
 
 	return "No Maters", err
+}
+
+func (cng *CreateTable) GetArtifact() string {
+	return cng.Artifact
+}
+
+func (cng *CreateTable) GetCluster() string{
+	return cng.Cluster
+}
+
+func (cng *CreateTable) GetDB() string {
+	return cng.DatabaseName
 }

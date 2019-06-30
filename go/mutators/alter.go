@@ -1,12 +1,10 @@
 package mutators
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/cohenjo/waste/go/config"
-	wh "github.com/cohenjo/waste/go/utils"
 	"github.com/github/gh-ost/go/base"
 	"github.com/github/gh-ost/go/logic"
 	"github.com/rs/zerolog/log"
@@ -15,8 +13,6 @@ import (
 type AlterTable struct {
 	BaseChange
 }
-
-
 
 func (cng *AlterTable) Validate() error {
 	return nil
@@ -29,39 +25,29 @@ func (cng *AlterTable) PostSteps() error {
 // RunChange - Runs the alter table
 // alter table - will be processed by GH-OST
 func (cng *AlterTable) RunChange() (string, error) {
-	data, err := wh.GetMasters(cng.Cluster)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("this is sad... %s", data)
 
-	}
-	m := make([]map[string]interface{}, 0)
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		log.Fatal().Err(err).Msg("this is bad... ")
-	}
-	for _, server := range m {
-		serverKey, ok := server["Key"].(map[string]interface{})
-		if !ok {
-			fmt.Printf("be angry")
-		}
-		hostname := serverKey["Hostname"].(string)
-		port := int(serverKey["Port"].(float64))
-		fmt.Printf("altering table on: (%s:%d) great \n", hostname, port)
+	var err error
+	for _, group := range cng.Groups {
 
 		var msg string
 		year, mo, day := time.Now().Date()
 		migrationContext := cng.generateContext()
 
-		migrationContext.InspectorConnectionConfig.Key.Hostname = hostname
-		migrationContext.InspectorConnectionConfig.Key.Port = port
-		migrationContext.AssumeMasterHostname = hostname
+		migrationContext.AssumeMasterHostname = group.Leader.Hostname 
+		migrationContext.InspectorConnectionConfig.Key.Hostname = group.Source.Hostname
+		migrationContext.InspectorConnectionConfig.Key.Port = int(group.Source.Port)
+		
+		err = migrationContext.ReadThrottleControlReplicaKeys(group.Lagger.Hostname);
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to parse replica list")
+		}
 		migrationContext.DatabaseName = cng.DatabaseName
 		migrationContext.OriginalTableName = cng.TableName
 		migrationContext.AlterStatement = cng.SQLCmd
 
 		migrator := logic.NewMigrator(migrationContext)
 
-		err := migrator.Migrate()
+		err = migrator.Migrate()
 		if err != nil {
 			migrator.ExecOnFailureHook()
 			log.Error().Err(err).Msgf("can't alter table table. %d-%d-%d", year, mo, day)
@@ -136,4 +122,16 @@ func (cng *AlterTable) generateContext() *base.MigrationContext {
 	// acceptSignals(migrationContext)
 
 	return migrationContext
+}
+
+func (cng *AlterTable) GetArtifact() string {
+	return cng.Artifact
+}
+
+func (cng *AlterTable) GetCluster() string{
+	return cng.Cluster
+}
+
+func (cng *AlterTable) GetDB() string {
+	return cng.DatabaseName
 }

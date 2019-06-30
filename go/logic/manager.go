@@ -1,7 +1,7 @@
 package logic
 
 import (
-	// "fmt"
+	"fmt"
 	// "time"
 
 	// "github.com/cohenjo/waste/go/config"
@@ -10,6 +10,9 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/cohenjo/waste/go/utils"
+	pb "github.com/cohenjo/waste/go/grpc/waste"
+	"github.com/pingcap/parser/ast"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
@@ -57,6 +60,7 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 
 	// @todo: do we accept change sets? or 1 by 1?
 	// change.EnrichChange()
+	log.Info().Msg("MangeChange: got new change")
 
 	// @todo: validate change
 	err := change.Validate()
@@ -102,12 +106,72 @@ func (cm *ChangeManager) storeChange(change mutators.Change) {
 
 	log.Info().Msgf("storing change: %+v",change)
 	var adv ArtifactDBVersion
-	// cm.db.Where(ArtifactDBVersion{Artifact: change.Artifact,
-	// 	Cluster:      change.Cluster,
-	// 	DatabaseName: change.DatabaseName}).Attrs("version", "1.0.0").FirstOrCreate(&adv)
+	cm.db.Where(ArtifactDBVersion{Artifact: change.GetArtifact(),
+		Cluster:      change.GetCluster(),
+		DatabaseName: change.GetDB()}).Attrs("version", "1.0.0").FirstOrCreate(&adv)
 	v := semver.New(adv.Version)
 	v.BumpMinor()
 	adv.Version = v.String()
 	cm.db.Save(&adv)
-	// cm.db.Create(&VersionsChangeLog{Version: adv.Version, Change: change})
+	cm.db.Create(&VersionsChangeLog{Version: adv.Version, Change: change})
+}
+
+func GenerateChange(in *pb.Change) (mutators.Change,error) {
+
+	
+	stmtNode,err := utils.Parse(in.Ddl)
+	if err != nil {
+		return 	nil,err
+	}
+
+	if stmtNode != nil {
+		switch stmt := (*stmtNode).(type) {
+		case *ast.CreateTableStmt:
+			fmt.Printf( "CREATE: %+v \n",stmt)
+			var change mutators.CreateTable
+			change.ChangeType = "create"
+			if stmt.Table.Name.String() != "" {
+				change.TableName = stmt.Table.Name.String()	
+			}
+			if stmt.Table.Schema.String() != "" {
+				change.DatabaseName = stmt.Table.Schema.String()
+			}
+
+			change.ASTNode = stmtNode
+			change.InferFromAST()
+			change.Artifact = in.Artifact
+			change.SQLCmd = in.Ddl
+			change.Leaders = in.Leaders
+		
+			return &change,nil
+
+		case *ast.AlterTableStmt:      
+			fmt.Printf( "UPDATE: %+v \n",stmt.Specs[0])
+			var change mutators.AlterTable
+			change.ChangeType = "alter"
+			if stmt.Table.Name.String() != "" {
+				change.TableName = stmt.Table.Name.String()	
+			}
+			if stmt.Table.Schema.String() != "" {
+				change.DatabaseName = stmt.Table.Schema.String()
+			}
+			change.ASTNode = stmtNode
+			change.InferFromAST()
+			change.Artifact = in.Artifact
+			change.Groups = in.Groups
+		
+			return &change,nil
+
+		// case *ast.CreateIndexStmt:
+		// 	fmt.Printf( "CREATE INDEX: %+v \n",stmt)
+		// 	cng.ChangeType = "index"
+			
+		default:
+			fmt.Printf("we only support alter and create table")
+			return nil,fmt.Errorf("we only support alter and create table")
+		}
+	}
+
+	return nil,fmt.Errorf("didn't find supported type")
+
 }

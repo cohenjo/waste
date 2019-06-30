@@ -84,3 +84,16 @@ func (cng *RenameTable) RunChange() (string, error) {
 	return "msg", err
 
 }
+
+
+func (cng *RenameTable) GetArtifact() string {
+	return cng.Artifact
+}
+
+func (cng *RenameTable) GetCluster() string{
+	return cng.Cluster
+}
+
+func (cng *RenameTable) GetDB() string {
+	return cng.DatabaseName
+}

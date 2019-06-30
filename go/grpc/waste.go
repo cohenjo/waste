@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	pb "github.com/cohenjo/waste/go/grpc/waste"
 	"github.com/cohenjo/waste/go/config"
+	"github.com/cohenjo/waste/go/logic"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/opentracing/opentracing-go"
 
@@ -40,6 +41,20 @@ func (s *server) Status(filter *pb.Filter, toClient pb.Waste_StatusServer) error
 
 // SendMessage implements helloworld.GreeterServer
 func (s *server) RunChange(ctx context.Context,in *pb.Change) (*pb.ChangeStatus, error) {
+
+	cng,err :=logic.GenerateChange(in)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to genrate change")
+		return 	nil,err
+	}
+
+	log.Info().Msgf("created change: %+v",cng)
+	err = logic.CM.MangeChange(cng)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to manage the change")
+		return 	nil,err
+	}
+
 	return &pb.ChangeStatus{
 		ChangeState:    pb.State_RUNNING,
 		Message: "test",

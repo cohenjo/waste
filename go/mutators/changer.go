@@ -1,14 +1,15 @@
 package mutators
 
 import (
-	// "database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	// "time"
+	"strings"
 
+	"github.com/pingcap/parser/format"
 	"github.com/pingcap/parser/ast"
+	pb "github.com/cohenjo/waste/go/grpc/waste"
 
 	// "github.com/cohenjo/waste/go/config"
 	wh "github.com/cohenjo/waste/go/utils"
@@ -26,6 +27,8 @@ type BaseChange struct {
 	ChangeType   string `json:change_type",omitempty"`
 	SQLCmd       string `json:ddl",omitempty"`
 	ASTNode *ast.StmtNode `json:",omitempty"`
+	Leaders              []*pb.Host   `json:"leaders,omitempty"`
+	Groups               []*pb.GHosts `json:"groups,omitempty"`
 }
 
 type Change interface {
@@ -33,7 +36,9 @@ type Change interface {
 	Validate() error
 	RunChange() (string,error)
 	PostSteps() error
-	
+	GetArtifact() string
+	GetCluster() string
+	GetDB() string
 }
 
 // Result is the output of DB calls - do we need this??
@@ -66,28 +71,6 @@ func (c *BaseChange) ReadFromURL(fileURL string, httpClient *http.Client) {
 
 }
 
-
-
-// RunChange runs the change according to the change type
-func (cng *BaseChange) RunChange() (string, error) {
-
-	var res string
-	var err error
-	switch cng.ChangeType {
-	// case "create":
-	// 	log.Info().Str("Action", "create").Msg("create new table - will be processed by CREATOR")
-	// 	res, err = cng.runTableCreate()
-	// case "alter":
-	// 	log.Info().Str("Action", "alter").Msg("alter table - will be processed by GH-OST")
-	// 	res, err = cng.runTableAlter()
-	// case "drop":
-	// 	log.Info().Str("Action", "drop").Msg("drop a table - You're likely an idiot - i'll keep it for now")
-	// 	res, err = cng.runTableRename()
-	default:
-		fmt.Println("You're an idiot - I'll just ignore and wait for you to go away")
-	}
-	return res, err
-}
 
 // EnrichChange tries to enrich the change with more details...
 func (cng *BaseChange) EnrichChange() {
@@ -127,9 +110,14 @@ func (cng *BaseChange) InferFromAST() {
 
 			// _ = stmt.Restore(ctx)
 		case *ast.AlterTableStmt:      
+			var sb strings.Builder
+			flags := format.DefaultRestoreFlags
+			sb.Reset()
+			ctx := format.NewRestoreCtx(flags,&sb)
 			fmt.Printf( "UPDATE: %+v \n",stmt.Specs[0])
 			cng.ChangeType = "alter"
-			// stmt.Specs[0].Restore(ctx)
+			stmt.Specs[0].Restore(ctx)
+			cng.SQLCmd = sb.String()
 			// _ = stmt.Restore(ctx)
 		case *ast.CreateIndexStmt:
 			fmt.Printf( "CREATE INDEX: %+v \n",stmt)
@@ -139,4 +127,15 @@ func (cng *BaseChange) InferFromAST() {
 			fmt.Printf("we only support alter and create table")
 		}
 	}
+}
+
+
+func (c *BaseChange) Validate() error {
+	return nil
+}
+func (c *BaseChange) RunChange() (string,error){
+	return "",nil
+}
+func (c *BaseChange) PostSteps() error {
+	return nil
 }

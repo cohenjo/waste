@@ -42,20 +42,20 @@ func Parse(query string) (*ast.StmtNode,error) {
 	if stmtNode != nil {
 		switch stmt := stmtNode.(type) {
 		case *ast.CreateTableStmt:
-			fmt.Printf( "CREATE: %+v \n",stmt)
+			// fmt.Printf( "CREATE: %+v \n",stmt)
 			_ = stmt.Restore(ctx)
 		case *ast.AlterTableStmt:      
-			fmt.Printf( "UPDATE: %+v \n",stmt.Specs[0])
+			// fmt.Printf( "UPDATE: %+v \n",stmt.Specs[0])
 			stmt.Specs[0].Restore(ctx)
 			// _ = stmt.Restore(ctx)
 		case *ast.CreateIndexStmt:
-			fmt.Printf( "CREATE INDEX: %+v \n",stmt)
+			// fmt.Printf( "CREATE INDEX: %+v \n",stmt)
 			_ = stmt.Restore(ctx)
 		default:
 			fmt.Printf("we only support alter and create table")
 		}
 	}
-	fmt.Printf("SB: %s",sb.String())
+	// fmt.Printf("SB: %s",sb.String())
 	return &stmtNode,nil
 }
 

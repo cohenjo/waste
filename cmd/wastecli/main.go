@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"time"
+	"encoding/json"
 
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/opentracing/opentracing-go"
@@ -19,8 +20,9 @@ import (
 
 var (
 	payload    *pb.Change
-	// logger     *util.SheepContextualLogger
 	dialTarget string
+	leaders string
+	ghosts string
 	rootCmd    = &cobra.Command{
 		Use:   "wastecli",
 		Short: "wastecli - Send changes to waste",
@@ -38,6 +40,15 @@ var (
 				os.Exit(1)
 			}
 			defer conn.Close()
+
+			err = json.Unmarshal([]byte(leaders), &payload.Leaders)
+			if err != nil {
+				logger.Error().Err(err).Msgf("Failed to json leaders: %s",leaders)
+			}
+			err = json.Unmarshal([]byte(ghosts), &payload.Groups)
+			if err != nil {
+				logger.Error().Err(err).Msgf("Failed to json groups: %s",ghosts)
+			}
 
 			// create client
 			client := pb.NewWasteClient(conn)
@@ -81,6 +92,7 @@ var (
 )
 
 func init() {
+	
 	payload = &pb.Change{}
 	rootCmd.Flags().StringVarP(&dialTarget, "waste-dial-target", "t", "", "GRPC endpont that run waste.waste service, e.g: --waste-dial-target='localhost:3006'")
 	rootCmd.MarkFlagRequired("waste-dial-target")
@@ -90,8 +102,8 @@ func init() {
 	rootCmd.Flags().StringVar(&payload.Db, "db", "", "db name")
 	rootCmd.Flags().StringVar(&payload.Table, "table", "", "")
 	rootCmd.Flags().StringVar(&payload.Ddl, "ddl", "", "")
-	// rootCmd.Flags().StringVar(&payload.Leaders, "leaders", "", "")
-	// rootCmd.Flags().Int32Var(&payload.Groups, "groups", 0, "")
+	rootCmd.Flags().StringVarP(&leaders, "leaders","l", "", "")
+	rootCmd.Flags().StringVarP(&ghosts, "ghosts","g", "", "")
 }
 
 func main() {

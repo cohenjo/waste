@@ -12,12 +12,6 @@ import (
 
 type DropChange struct {
 	BaseChange
-	Artifact     string
-	Cluster      string
-	DatabaseName string
-	TableName    string
-	ChangeType   string
-	SQLCmd       string
 }
 
 func (cng *DropChange) Validate() error {
@@ -95,4 +89,17 @@ func DropTask(cng DropChange) {
 		log.Error().Err(err).Msgf("Drop change failed - this may leave trash: %s", cng.TableName)
 	}
 	log.Info().Msgf("Table Dropped: %s", msg)
+}
+
+
+func (cng *DropChange) GetArtifact() string {
+	return cng.Artifact
+}
+
+func (cng *DropChange) GetCluster() string{
+	return cng.Cluster
+}
+
+func (cng *DropChange) GetDB() string {
+	return cng.DatabaseName
 }
