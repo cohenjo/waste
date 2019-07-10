@@ -21,6 +21,11 @@ func (cng *DropChange) Validate() error {
 func (cng *DropChange) PostSteps() error {
 	return nil
 }
+// Immediate - drop change is never immediate as we want to give time and option to cancel.
+func (cng *DropChange) Immediate() bool {
+	return false
+}
+
 
 func (cng *DropChange) RunChange() (string, error) {
 	data, err := wh.GetMasters(cng.Cluster)

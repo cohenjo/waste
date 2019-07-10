@@ -19,6 +19,11 @@ func (cng *CreateTable) Validate() error {
 func (cng *CreateTable) PostSteps() error {
 	return nil
 }
+
+func (cng *CreateTable) Immediate() bool {
+	return true
+}
+
 /**
 *  RunTableCreate simply runs the given create statement - no validation yet.
 * TODO:

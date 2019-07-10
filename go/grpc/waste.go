@@ -30,13 +30,13 @@ type server struct{
 }
 
 func (s *server) Status(filter *pb.Filter, toClient pb.Waste_StatusServer) error {
-	cngStatus := &pb.ChangeStatus{
-		ChangeState:    pb.State_RUNNING,
-		Message: "test",
-		Uuid: "XXX-XXX-XXX-XXX",
+	
+	for _,cngStatus := range logic.CM.GetChanges(filter) {
+		err := toClient.Send(cngStatus)
+		log.Error().Err(err).Msg("Failed to send changestatus")
 	}
-	err := toClient.Send(cngStatus)
-	return err
+	
+	return nil
 }
 
 // SendMessage implements helloworld.GreeterServer
@@ -49,17 +49,13 @@ func (s *server) RunChange(ctx context.Context,in *pb.Change) (*pb.ChangeStatus,
 	}
 
 	log.Info().Msgf("created change: %+v",cng)
-	err = logic.CM.MangeChange(cng)
+	cngStatus, err := logic.CM.MangeChange(cng)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to manage the change")
 		return 	nil,err
 	}
 
-	return &pb.ChangeStatus{
-		ChangeState:    pb.State_RUNNING,
-		Message: "test",
-		Uuid: "XXX-XXX-XXX-XXX",
-	}, nil
+	return cngStatus, nil
 }
 
 

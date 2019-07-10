@@ -22,6 +22,10 @@ func (cng *AlterTable) PostSteps() error {
 	return nil
 }
 
+func (cng *AlterTable) Immediate() bool {
+	return false
+}
+
 // RunChange - Runs the alter table
 // alter table - will be processed by GH-OST
 func (cng *AlterTable) RunChange() (string, error) {

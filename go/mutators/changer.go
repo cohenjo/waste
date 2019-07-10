@@ -39,6 +39,7 @@ type Change interface {
 	GetArtifact() string
 	GetCluster() string
 	GetDB() string
+	Immediate() bool
 }
 
 // Result is the output of DB calls - do we need this??

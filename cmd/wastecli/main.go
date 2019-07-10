@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"os"
+	"io"
 	"time"
 	"encoding/json"
 
@@ -20,6 +21,7 @@ import (
 
 var (
 	payload    *pb.Change
+	filter     *pb.Filter
 	dialTarget string
 	leaders string
 	ghosts string
@@ -89,21 +91,73 @@ var (
 			return
 		},
 	}
+
+	statusCmd = &cobra.Command{
+		Use:   "status",
+		Short: "get changes status",
+		Long: `print out the status of changes in the current WASTE instance `,
+		Run: func(cmd *cobra.Command, args []string) {
+			// create connection
+			conn, err := grpc.Dial(dialTarget, grpc.WithInsecure(),
+				grpc.WithUnaryInterceptor(
+					otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
+				grpc.WithStreamInterceptor(
+					otgrpc.OpenTracingStreamClientInterceptor(opentracing.GlobalTracer())))
+			if err != nil {
+				logger.Error().Err(err).Msgf("Unable to Dial to target: %s", dialTarget)
+				os.Exit(1)
+			}
+			defer conn.Close()
+
+			// create client
+			client := pb.NewWasteClient(conn)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			sp := opentracing.StartSpan("status")
+			sp.LogFields(
+				log.String("dialTarget", dialTarget),
+			)
+			defer sp.Finish()
+			// inject the span to the context
+			ctx = opentracing.ContextWithSpan(ctx, sp)
+			// logger.WithSpan(sp).Info().Msg("Sending payload...")
+			res, _  := client.Status(ctx, filter)
+			for {
+				s,err := res.Recv()	
+				if err == io.EOF {
+					logger.Info().Msg("Done reading stream.")
+					return 
+				}
+				if err != nil {
+					logger.Error().Err(err).Msg("error while reading strem.")
+					return 
+				}
+				logger.Info().Msgf("return with: %s", s.String())
+			}
+			return
+		},
+	}
 )
 
 func init() {
 	
 	payload = &pb.Change{}
+	filter = &pb.Filter{}
 	rootCmd.Flags().StringVarP(&dialTarget, "waste-dial-target", "t", "", "GRPC endpont that run waste.waste service, e.g: --waste-dial-target='localhost:3006'")
 	rootCmd.MarkFlagRequired("waste-dial-target")
 	rootCmd.Flags().StringVar(&payload.Artifact, "artifact", "", "artifact")
-	rootCmd.MarkFlagRequired("artifact")
 	rootCmd.Flags().StringVar(&payload.Cluster, "cluster", "", "cluster name")
 	rootCmd.Flags().StringVar(&payload.Db, "db", "", "db name")
 	rootCmd.Flags().StringVar(&payload.Table, "table", "", "")
 	rootCmd.Flags().StringVar(&payload.Ddl, "ddl", "", "")
 	rootCmd.Flags().StringVarP(&leaders, "leaders","l", "", "")
 	rootCmd.Flags().StringVarP(&ghosts, "ghosts","g", "", "")
+
+	rootCmd.AddCommand(statusCmd)
+	statusCmd.Flags().StringVarP(&dialTarget, "waste-dial-target", "t", "", "GRPC endpont that run waste.waste service, e.g: --waste-dial-target='localhost:3006'")
+	statusCmd.MarkFlagRequired("waste-dial-target")
+	statusCmd.Flags().StringSliceVar(&filter.Uuid, "uuid",[]string{}, "comma seperated uuids")
 }
 
 func main() {

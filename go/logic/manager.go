@@ -3,6 +3,7 @@ package logic
 import (
 	"fmt"
 	// "time"
+	"github.com/google/uuid"
 
 	// "github.com/cohenjo/waste/go/config"
 	"github.com/cohenjo/waste/go/mutators"
@@ -32,6 +33,7 @@ type ArtifactDBVersion struct {
 
 type ChangeManager struct {
 	db *gorm.DB
+	changes map[string]*pb.ChangeStatus
 }
 
 var CM *ChangeManager
@@ -52,11 +54,12 @@ func SetupChangeManager() *ChangeManager {
 
 	return &ChangeManager{
 		db: db,
+		changes: make(map[string]*pb.ChangeStatus),
 	}
 }
 
 // MangeChange - manages the change flow, validation, auditing, and execution.
-func (cm *ChangeManager) MangeChange(change mutators.Change) error {
+func (cm *ChangeManager) MangeChange(change mutators.Change) (*pb.ChangeStatus,error) {
 
 	// @todo: do we accept change sets? or 1 by 1?
 	// change.EnrichChange()
@@ -65,19 +68,30 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 	// @todo: validate change
 	err := change.Validate()
 	if err != nil {
-		log.Error().Msg("Failed to validate change")
-		return errors.New("Failed to validate change")
+		log.Error().Err(err).Msg("Failed to validate change")
+		return nil,errors.New("Failed to validate change")
 	}
 
 	// @todo: audit change
-	cm.storeChange(change)
+	cngStatus,err := cm.storeChange(change)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to store change")
+		return nil,errors.New("Failed to store change")
+	}
+
+	if change.Immediate() {
+		status, err := change.RunChange()
+		if err != nil {
+			log.Error().Err(err).Msg("something went wrong during change run")
+			return nil,err
+		}
+		log.Info().Msgf("finished migration, status: %s", status)
+	} else {
+		go change.RunChange()
+	}
 
 	// @todo: schedule change <== should we here or externally?
-	status, err := change.RunChange()
-	if err != nil {
-		log.Error().Err(err).Msg("something went wrong during change run")
-		return err
-	}
+	
 
 	// Cleanup renamed table
 	// if change.ChangeType == "drop" {
@@ -97,12 +111,18 @@ func (cm *ChangeManager) MangeChange(change mutators.Change) error {
 	// 	scheduler.WS.AddTask(config.Config.GraceDays, "drop", dropChange)
 	// }
 
-	log.Info().Msgf("finished migration, status: %s", status)
-
-	return nil
+	return cngStatus,err
 }
 
-func (cm *ChangeManager) storeChange(change mutators.Change) {
+func (cm *ChangeManager) storeChange(change mutators.Change) (*pb.ChangeStatus,error) {
+
+	id, _ := uuid.NewUUID()
+	cngStatus := &pb.ChangeStatus{
+		// Change: change,
+		Uuid: id.String(),
+		ChangeState: pb.State_PENDING,
+	}
+	cm.changes[id.String()] = cngStatus
 
 	log.Info().Msgf("storing change: %+v",change)
 	var adv ArtifactDBVersion
@@ -114,6 +134,8 @@ func (cm *ChangeManager) storeChange(change mutators.Change) {
 	adv.Version = v.String()
 	cm.db.Save(&adv)
 	cm.db.Create(&VersionsChangeLog{Version: adv.Version, Change: change})
+
+	return cngStatus,nil
 }
 
 func GenerateChange(in *pb.Change) (mutators.Change,error) {
@@ -174,4 +196,25 @@ func GenerateChange(in *pb.Change) (mutators.Change,error) {
 
 	return nil,fmt.Errorf("didn't find supported type")
 
+}
+ 
+func (cm *ChangeManager) GetChanges(filter *pb.Filter) []*pb.ChangeStatus {
+	values := []*pb.ChangeStatus{}
+
+	// if we have UUID filter we will use that
+	if len(filter.Uuid) >0 {
+		for _,uuid := range filter.Uuid {
+			if val, ok := cm.changes[uuid]; ok {
+				values = append(values, val)
+			}
+		} 
+	} else {
+		for _, v := range cm.changes {
+			values = append(values, v)
+		}
+	}
+
+	
+
+	return values
 }

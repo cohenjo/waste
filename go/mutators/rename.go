@@ -97,3 +97,7 @@ func (cng *RenameTable) GetCluster() string{
 func (cng *RenameTable) GetDB() string {
 	return cng.DatabaseName
 }
+
+func (cng *RenameTable) Immediate() bool {
+	return true
+}
